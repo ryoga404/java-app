@@ -121,6 +121,8 @@ git push origin ブランチ名
 | 6   | ローカルブランチ削除（マージ済み）      | `git branch -d ブランチ名`         |
 | 7   | ローカルブランチ削除（強制）         | `git branch -D ブランチ名`         |
 | 8   | ローカルブランチ切り替え             | `git checkout ブランチ名`          |
+| 9   | リモートブランチ削除            | `git push origin --delete ブランチ名`  |
+
 
 ---
 
