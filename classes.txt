@@ -12,14 +12,14 @@ RestorePanel       ：データリストア画面（ファイルインポート�
 GroupPanel         ：グループ作成・退会・参加画面
 
 [ロジック・DAO（DB）・ユーティリティ系 クラス一覧]
-DBUtil             ：MySQL接続ユーティリティクラス（JDBC用）
+DBUtil             ：MySQL接続ユーティリティクラス（JDBC用）（作成済み）
 UserDAO            ：ユーザ情報の登録・認証・削除
 SaltDAO            ：ユーザごとのソルト保存・取得
 SessionDAO         ：セッション情報の登録・照合・削除
 RecordDAO          ：家計簿データのCRUD操作
 CategoryDAO        ：カテゴリ情報の取得・管理
 GroupDAO           ：グループ・メンバ管理（作成／参加／退会）
-PassToHash         ：パスワード＋ソルトのハッシュ処理（ストレッチング可）
+PassToHash         ：パスワード＋ソルトのハッシュ処理（ストレッチング可）（作成済み）
 FileUtil           ：CSV/JSON形式でのデータ保存・読み込み（任意）
 ChartUtil          ：JFreeChart用のグラフ描画補助クラス（任意）
 
