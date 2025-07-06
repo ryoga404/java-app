@@ -1,0 +1,30 @@
+[UI（画面系）クラス一覧]
+MainFrame          ：アプリのルート画面。CardLayoutで画面切り替え管理
+LoginPanel         ：ログイン画面。ユーザ名・パスワード入力＋ログインボタン
+RegisterPanel      ：ユーザ登録画面。条件付きパスワード入力
+HomePanel          ：ログイン後メニュー画面。各機能への遷移
+AddRecordPanel     ：家計簿データ登録画面（カテゴリ・金額・収支・メモ）
+EditRecordPanel    ：データ編集画面。既存レコードの編集
+SearchPanel        ：検索／抽出画面。JTable表示・ソート付き
+GraphPanel         ：グラフ描画画面（JFreeChart使用想定）
+BackupPanel        ：データバックアップ画面（CSV/JSON/ZIP）
+RestorePanel       ：データリストア画面（ファイルインポート）
+GroupPanel         ：グループ作成・退会・参加画面
+
+[ロジック・DAO（DB）・ユーティリティ系 クラス一覧]
+DBUtil             ：MySQL接続ユーティリティクラス（JDBC用）
+UserDAO            ：ユーザ情報の登録・認証・削除
+SaltDAO            ：ユーザごとのソルト保存・取得
+SessionDAO         ：セッション情報の登録・照合・削除
+RecordDAO          ：家計簿データのCRUD操作
+CategoryDAO        ：カテゴリ情報の取得・管理
+GroupDAO           ：グループ・メンバ管理（作成／参加／退会）
+PassToHash         ：パスワード＋ソルトのハッシュ処理（ストレッチング可）
+FileUtil           ：CSV/JSON形式でのデータ保存・読み込み（任意）
+ChartUtil          ：JFreeChart用のグラフ描画補助クラス（任意）
+
+[呼び出し]
+Main : エントリポイント
+
+（任意部分は優先度低！）
+（SQLはGitHub内のsqlファイルをクローンしMariaDB（MySQL）にいれる）
