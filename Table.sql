@@ -6,7 +6,6 @@ USE kakeibo;
 CREATE TABLE User (
     UserId VARCHAR(20) PRIMARY KEY,
     HashedPassword VARCHAR(255) NOT NULL,
-    LockCount INT DEFAULT 0
 );
 
 
