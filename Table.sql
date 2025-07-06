@@ -1,0 +1,60 @@
+DROP DATABASE kakeibo;
+CREATE DATABASE IF NOT EXISTS kakeibo DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE kakeibo;
+
+
+CREATE TABLE User (
+    UserId VARCHAR(20) PRIMARY KEY,
+    HashedPassword VARCHAR(255) NOT NULL,
+    LockCount INT DEFAULT 0
+);
+
+
+CREATE TABLE Salt (
+    UserId VARCHAR(20) PRIMARY KEY,
+    Salt VARCHAR(255) NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES User(UserId) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Session (
+    SessionId VARCHAR(255) PRIMARY KEY,
+    UserId VARCHAR(20) NOT NULL,
+    LoginTime DATETIME NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES User(UserId) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Category (
+    CategoryId INT AUTO_INCREMENT PRIMARY KEY,
+    CategoryName VARCHAR(50) NOT NULL
+);
+
+
+CREATE TABLE Record (
+    RecordId INT AUTO_INCREMENT PRIMARY KEY,
+    UserId VARCHAR(20) NOT NULL,
+    Date DATE NOT NULL,
+    CategoryId INT,
+    Type ENUM('In', 'Out') NOT NULL,
+    Amount INT NOT NULL,
+    Memo VARCHAR(100),
+    FOREIGN KEY (UserId) REFERENCES User(UserId) ON DELETE CASCADE,
+    FOREIGN KEY (CategoryId) REFERENCES Category(CategoryId)
+);
+
+
+CREATE TABLE GroupTable (
+    GroupId INT AUTO_INCREMENT PRIMARY KEY,
+    GroupName VARCHAR(50) NOT NULL,
+    OwnerId VARCHAR(20),
+    FOREIGN KEY (OwnerId) REFERENCES User(UserId) ON DELETE SET NULL
+);
+
+CREATE TABLE GroupMember (
+    GroupId INT NOT NULL,
+    UserId VARCHAR(20) NOT NULL,
+    PRIMARY KEY (GroupId, UserId),
+    FOREIGN KEY (GroupId) REFERENCES GroupTable(GroupId) ON DELETE CASCADE,
+    FOREIGN KEY (UserId) REFERENCES User(UserId) ON DELETE CASCADE
+);
