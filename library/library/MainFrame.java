@@ -1,4 +1,5 @@
-package jp.ac.kcs.swing.library;
+//package jp.ac.kcs.swing.library;
+package library;
 
 import java.awt.*;
 import javax.swing.*;

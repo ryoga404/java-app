@@ -1,4 +1,6 @@
-package jp.ac.kcs.swing.library;
+//package jp.ac.kcs.swing.library;
+package library;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
