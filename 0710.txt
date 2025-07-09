@@ -43,8 +43,3 @@
 
 
 git bashでcommitする際にデフォルトではmid
-コミッターを指定するには
-git commit --author="自分の名前 <GitHubに登録してあるメールアドレス>" -m "メッセージ"
-
-
-　
