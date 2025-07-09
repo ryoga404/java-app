@@ -1,0 +1,40 @@
+2025/7/10 Memo（Eclipse再設定とGit Bashでアップロード、DB設定）
+
+　GitBash起動→ 
+	cd /C/Users/mid
+	source .bashrc
+		パスワードを聞かれる場合は「password」
+
+　Desktopに戻り、kakeiboもしくはjava-app関連のディレクトリ削除
+　
+　GitBashに戻る→
+	cd Desktop
+	git clone https://github.com/ryoga404/java-app.git
+	cd java-app
+	git pull origin main（中身を最新にしておく）
+
+　Eclipse起動→
+	ファイル→ワークスペース切り替え
+	Desktop/java-app指定
+	プロジェクトのインポート→一般→
+		→フォルダーまたはアーカイブからプロジェクト→ディレクトリ→
+		Desktop/java-app/kakeibo選択しインポート
+
+（パッケージエクスプロラーにkakeiboが追加されたことを確認）
+
+ 
+　xampp contorolerを管理者権限で起動（mysqlのみstart）
+
+　コマンドプロンプト起動（Win＋Rでcmdエンター）
+　	cd C:\xampp\mysql\bin
+	
+　MariaDB（MySQLへDBとテーブル構造追加）　※SQLファイル参照
+	mysql -u root -p < C:\Users\mid\Desktop\java-app\Table.sql
+
+
+時間が余れば、GUIクラス（各メソッド呼び出し部分はコメントアウトで）
+を割り振って作っていく。（レイアウトは基本自由）
+
+
+
+　
