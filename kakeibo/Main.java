@@ -1,3 +1,5 @@
+//package kakeibo;
+
 import javax.swing.SwingUtilities;
 
 public class Main {
