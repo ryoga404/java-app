@@ -35,6 +35,12 @@
 時間が余れば、GUIクラス（各メソッド呼び出し部分はコメントアウトで）
 を割り振って作っていく。（レイアウトは基本自由）
 
+	・ユーザ登録（RegisterPanel.java）
+	・ユーザログイン（LoginPanel.java）
+	・データ追加（AddRecordPanel.java）
+	・ログイン後のホーム画面（HomePanel.java）
+	・ログイン前のトップ画面（TopPanel.java)
+
 
 
 　
