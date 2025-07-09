@@ -43,3 +43,5 @@
 
 
 git bashでcommitする際にデフォルトではmid
+自分の名前にするには
+GIT_COMMITTER_NAME="自分の名前" GIT_COMMITTER_EMAIL="自分のメアド" git commit --author="自分の名前 <自分のメールアドレス>" -m "メッセージ"
