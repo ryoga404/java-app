@@ -1,6 +1,6 @@
 USE kakeibo;
 
-INSERT INTO Category VALUES
+INSERT INTO Category(CategoryName) VALUES
 	('家賃'),
 	('電気代'),
 	('ガス代'),
