@@ -8,9 +8,14 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class TopPanel {
+public class TopPanel extends JPanel{
+	private MainFrame mainFrame;
 
-    public static void main(String[] args) {
+    public TopPanel(MainFrame mainFrame) {
+		this.mainFrame = mainFrame;
+	}
+
+	public static void main(String[] args) {
         JFrame frame = new JFrame("家計簿アプリ");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(350, 250);
