@@ -1,0 +1,12 @@
+error: Your local changes to the following files would be overwritten by merge:
+  Sample.java
+Please commit your changes or stash them before you merge.
+Aborting
+
+みたいなエラーが出るとき、
+
+git stash          # 一時的に変更を退避（作業内容はメモリの中に保存される）
+git pull origin main  # リモートの変更を問題なく取り込む
+git stash pop      # 退避した自分の変更を元に戻す（競合があればここで出る）
+
+２人以上が同じファイル・行の編集はしない
