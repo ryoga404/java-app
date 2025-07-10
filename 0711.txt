@@ -9,9 +9,12 @@
 ５、xampp-contollerを管理者権限で開く（mysqlのみスタートさせる）
 ６、Win+R Enterでコマンドプロンプトを開く
 ７、cd C:\xampp\mysql\bin 
-８、DBの中にカテゴリを追加（AddRecord等でカテゴリを使用するため）
+８、MySQLのkakeibo DB内の文字コードをUTF-8に統一（GUIで文字化けするのを防ぐ）
+　mysql -u root -p < C:\Users\mid\Desktop\java-app\Change-utf8.sql
+
+９、DBの中にカテゴリを追加（AddRecord等でカテゴリを使用するため）
 　　mysql -u root -p < C:\Users\mid\Desktop\java-app\CategoryAdd.sql
-９、コマンドプロンプトは閉じる
+１０、コマンドプロンプトは閉じる
 
 0710に進めた画面レイアウトの修正と新規作成
 	修正箇所
