@@ -1,38 +1,4 @@
-2025/7/10 Memo（Eclipse再設定とGit Bashでアップロード、DB設定）
-
-１、GitBash起動→ 
-	cd /C/Users/mid
-	source .bashrc
-		パスワードを聞かれる場合は「password」
-
-２、Desktopに戻り、kakeiboもしくはjava-app関連のディレクトリ削除
-　
-３、GitBashに戻る→
-	cd Desktop
-	git clone https://github.com/ryoga404/java-app.git
-	cd java-app
-	git pull origin main（中身を最新にしておく）
-
-４、Eclipse起動→
-	ファイル→ワークスペース切り替え→クラス番号_名前
-	インポート→一般→
-		→フォルダーまたはアーカイブからプロジェクト→ディレクトリ→
-		Desktop/java-app/kakeibo選択しインポート
-
-（パッケージエクスプロラーにkakeiboが追加されたことを確認）
-
- -------------------------
-５、xampp contorolerを管理者権限で起動（mysqlのみstart）
-
-６、コマンドプロンプト起動（Win＋Rでcmdエンター）
-　	cd C:\xampp\mysql\bin
-	
-７、MariaDB（MySQLへDBとテーブル構造追加）　※SQLファイル参照
-	mysql -u root -p < C:\Users\mid\Desktop\java-app\Table.sql
-
-
-時間が余れば、GUIクラス（各メソッド呼び出し部分はコメントアウトで）
-を割り振って作っていく。（レイアウトは基本自由）
+（レイアウトは基本自由）
 
 	・ユーザ登録（RegisterPanel.java）
 	・ユーザログイン（LoginPanel.java）
@@ -44,3 +10,20 @@
 git bashでcommitする際にデフォルトではmid
 自分の名前にするには
 GIT_COMMITTER_NAME="自分の名前" GIT_COMMITTER_EMAIL="自分のメアド" git commit --author="自分の名前 <自分のメールアドレス>" -m "メッセージ"
+
+ユーザ登録
+　ユーザ名とパスワード、登録ボタンは必須
+
+ユーザログイン
+　ユーザ名とパスワード、ログインボタンは必須
+
+ログイン前のトップ画面
+　ログイン・ユーザ登録画面への遷移ボタン
+
+ログイン後のトップ画面
+　データ登録
+　データ抽出
+　データインポート
+　データエクスポート
+　グループ作成・参加
+　ログアウト
