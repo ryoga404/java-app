@@ -1,0 +1,55 @@
+0711 Memo
+１、Git Bashを起動
+２、cd C:\Users\mid
+３、source .bashrc（パスワードを入力:password)
+４、cd Desktop\java-app
+５、git remote set-url origin git@github.com:ryoga404/java-app.git
+６、git pull origin main（ローカル環境を最新版に）
+４、Desktopに戻る
+５、xampp-contollerを管理者権限で開く（mysqlのみスタートさせる）
+６、Win+R Enterでコマンドプロンプトを開く
+７、cd C:\xampp\mysql\bin 
+８、DBの中にカテゴリを追加（AddRecord等でカテゴリを使用するため）
+　　mysql -u root -p < C:\Users\mid\Desktop\java-app\CategoryAdd.sql
+９、コマンドプロンプトは閉じる
+
+0710に進めた画面レイアウトの修正と新規作成
+	修正箇所
+	　１、HomePanel：mainメソッドを削除（Mainクラスでしか使用しないため）
+	　２、
+	　
+	新規作成
+	　UserDAO（User関連のデータをDBの中へ格納する）
+	　	addUserメソッド
+	　	１、GUIのRegisterPanel（ユーザ登録画面）で入力されたパスワードを
+	　	PassToHash.createHashedPassword(password)で処理。
+	　	　戻り値としてsalt・hashedPasswordが返ってくる。
+	　	
+	　	２、Userテーブル（DB内の）にユーザ情報を格納する（PreparedStatementを使用）
+	　	SQL：insert into User(UserId, HashedPassword) values (?, ?)
+	　	ユーザIDとハッシュ済みパスワードをUserテーブルに保存する。
+	　	
+	　	３、Saltテーブルにソルトを登録
+	　	SQL:insert into salt(UserId, Salt) values (?, ?)
+	　	ユーザIDとソルトをSaltテーブルに保存する。
+	　	
+	　	登録が完了したらダイアログで
+	　		登録が完了しました！
+	　		ユーザID： <<userId>>
+	　		
+	　	loginメソッド（ログインするメソッド）
+	　	１、GUIのLoginPanel（ユーザログイン画面）で入力されたユーザIDに対応するソルトがあるかチェック
+	　	SQL：select salt from Salt where UserId = ?
+	　	ソルトがなければ失敗ダイアログ
+	　	
+	　	２、入力されたパスワードと１、で取得したソルトをPassToHash.hassPassword(password, salt)で検証
+	　	
+	　	３、２でかえって来たハッシュ値とDBのUserテーブルのHashedPasswordが一致しているかチェック
+	　	SQL：SELECT * FROM User WHERE UserId = ? AND HashedPassword = ?
+		結果セットに結果がなければログイン失敗
+		
+		４、sessionDAO のインスタンスを作成
+		５、４、のcreateSession(userId)を呼ぶ
+		６、５の戻り値を格納
+	　	
+	　	
