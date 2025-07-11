@@ -47,6 +47,12 @@ public class PassToHash {
             this.hashedPassword = hashedPassword;
         }
     }
+    
+ // 既存のソルトを使ってハッシュを再生成（ログイン用）
+    public static String hashWithSalt(String password, String salt) {
+        return hashPassword(password, salt); // 内部の既存メソッドを再利用
+    }
+
 }
 
 /*

@@ -12,10 +12,7 @@ public class LoginPanel extends JPanel {
 
     public LoginPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
-    }
-    
-    public void Login(MainFrame frame) {
+   
     	setLayout(new GridLayout(3, 2));
     	//IDのテキストフィールド
     	JTextField idField = new JTextField();
@@ -33,7 +30,7 @@ public class LoginPanel extends JPanel {
         });
     	
     	//TOPに戻るボタン
-    	backBtn.addActionListener(e -> frame.showPanel("TOP"));
+    	backBtn.addActionListener(e -> mainFrame.showPanel("TOP"));
     	
     	//カードに部品を追加
     	add(new JLabel("ユーザーID"));
@@ -43,5 +40,4 @@ public class LoginPanel extends JPanel {
         add(loginBtn);
         add(backBtn);
     }
-
 }

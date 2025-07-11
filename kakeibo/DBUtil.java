@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBUtil {
-    private static final String URL = "jdbc:mysql://localhost:3306/test?useSSL=false"; //接続のためのURL
+    private static final String URL = "jdbc:mysql://localhost:3306/kakeibo?useSSL=false"; //接続のためのURL
     private static final String USER = "root"; //ユーザ名
     private static final String PASSWORD = ""; //パスワードなし
 
