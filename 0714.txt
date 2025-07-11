@@ -1,0 +1,33 @@
+１、GitBash起動
+２、cd /C/Users/mid/
+３、source .bashrc
+（パスワード：password)
+４、cd Desktop/java-app
+５、git remote set-url origin git@github.com:ryoga404/java-app.git
+６、git pull origin main
+
+今日は、各機能を実装
+	・（Javaファイル名：.java）
+	・（Javaファイル名：.java）
+	・（Javaファイル名：.java）
+	・（Javaファイル名：.java）
+
+（！ファイルを作成するとき）
+・担当ファイル以外は編集しない（特に同じファイル同じ行）
+・作業が終わったらGitにあげる
+　・先にgit pull origin mainを行い、他の人の変更を自分のローカルに取り込む
+　・その後、
+	git add <<編集したファイル名>>
+	git commit -m "メッセージ"
+	git push origin main
+・（時間が余れば）自分が作成したファイルの先頭にコメントアウトでユーザ名だけ記述
+	git pull origin main
+	git commit -m "Creater Add"
+	git push origin main
+
+
+-------------
+0715 
+　・画面レイアウトの一部修正（大まかな部品の場所だけ）
+　・ボタンのリスナー設定（SQLへアクセスしDB関連処理が動くかチェック）
+　
