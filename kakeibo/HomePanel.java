@@ -14,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 public class HomePanel extends JFrame {
 
@@ -75,11 +74,5 @@ public class HomePanel extends JFrame {
         contentPane.add(mainContent, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) {
-        // SwingはEDTで実行
-        SwingUtilities.invokeLater(() -> {
-            HomePanel panel = new HomePanel();
-            panel.setVisible(true);
-        });
-    }
+
 }
