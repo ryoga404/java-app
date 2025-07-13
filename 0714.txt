@@ -6,11 +6,29 @@
 ５、git remote set-url origin git@github.com:ryoga404/java-app.git
 ６、git pull origin main
 
-今日は、各機能を実装
+各機能を呼び出す（DBへ登録する等）部分を作成（作る前にgit pullで自身のディレクトリを最新に！）
+	・（Javaファイル名：RegisterPanel.java）
+		登録ボタンが押されたら、
+			１、passとpass2をif文で同じかチェック
+			　　（同じ）特になにもしない
+			　　（異なる）ダイアログを出す
+			２、UserIDとpassをUserDAOのaddUser(String userId, String password)メソッドに渡す。
+
+
+	・（Javaファイル名：LoginPanel.java）
+		・UserDAOのインスタンスを生成
+		・文字列型でsessionId宣言。ユーザ名とパスワードを引数にloginメソッドを呼ぶ。
+		・sessionIdがnullであればログイン失敗。
+	・（Javaファイル名：TopPanel.java）
+		・mainメソッドは使用しない（Mainクラスでしか使用しない）
+		・JFrameインスタンス削除
+		　　・setDefaultClose...削除
+		　　・setSize削除
+		　　・setLocationRelativeTo削除
+		・もともとmainメソッドに入っているものをコンストラクタ内に移動
 	・（Javaファイル名：.java）
-	・（Javaファイル名：.java）
-	・（Javaファイル名：.java）
-	・（Javaファイル名：.java）
+	
+
 
 （！ファイルを作成するとき）
 ・担当ファイル以外は編集しない（特に同じファイル同じ行）
@@ -27,7 +45,5 @@
 
 
 -------------
-0715 
-　・画面レイアウトの一部修正（大まかな部品の場所だけ）
-　・ボタンのリスナー設定（SQLへアクセスしDB関連処理が動くかチェック）
+
 　

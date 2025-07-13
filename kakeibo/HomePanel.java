@@ -1,31 +1,15 @@
-//package kakeibo;
+import java.awt.*;
+import javax.swing.*;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+public class HomePanel extends JPanel {
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+    private MainFrame mainFrame;
 
-public class HomePanel extends JFrame {
+    public HomePanel(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
 
-    public HomePanel() {
-        setTitle("家計簿アプリ - ホームパネル");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null); // 画面中央
-
-        // 全体レイアウト（BorderLayout）
-        Container contentPane = getContentPane();
-        contentPane.setLayout(new BorderLayout());
+        // HomePanel 自体のレイアウトを BorderLayout に設定
+        setLayout(new BorderLayout());
 
         // --- ヘッダー ---
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -46,7 +30,7 @@ public class HomePanel extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBackground(new Color(244, 244, 244));
-        menuPanel.setPreferredSize(new Dimension(200, getHeight()));
+        menuPanel.setPreferredSize(new Dimension(200, 600));  // 600は任意
         menuPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         String[] menuItems = {
@@ -69,10 +53,8 @@ public class HomePanel extends JFrame {
         mainContent.add(placeholder);
 
         // --- 配置 ---
-        contentPane.add(headerPanel, BorderLayout.NORTH);
-        contentPane.add(menuPanel, BorderLayout.WEST);
-        contentPane.add(mainContent, BorderLayout.CENTER);
+        add(headerPanel, BorderLayout.NORTH);
+        add(menuPanel, BorderLayout.WEST);
+        add(mainContent, BorderLayout.CENTER);
     }
-
-
 }
