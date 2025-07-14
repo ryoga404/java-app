@@ -2,6 +2,7 @@ import java.awt.GridLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -26,7 +27,27 @@ public class LoginPanel extends JPanel {
     	
     	//ログインボタンが押されたら
     	loginBtn.addActionListener(e -> {
-    		
+    		String userId = idField.getText();
+            String password = passField.getText();
+
+            // ユーザー認証
+            UserDAO userDAO = new UserDAO();
+            String isLoginSuccess = userDAO.login(userId, password);
+
+            if (isLoginSuccess != null) {
+                // セッション生成
+                SessionDAO sessionDAO = new SessionDAO();
+                String sessionId = sessionDAO.createSession(userId);
+
+                if (sessionId != null) {
+                    mainFrame.setSessionId(sessionId);
+                    mainFrame.showPanel("home");
+                } else {
+                    JOptionPane.showMessageDialog(this, "セッションの作成に失敗しました。");
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "ログイン失敗。ユーザーIDまたはパスワードが正しくありません。");
+            }
         });
     	
     	//TOPに戻るボタン
