@@ -1,60 +1,200 @@
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.util.HashMap;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 public class HomePanel extends JPanel {
 
     private MainFrame mainFrame;
+    private JPanel viewPanel;
+    private HashMap<String, JPanel> views = new HashMap<>();
+    private HashMap<String, JButton> menuButtons = new HashMap<>();
+    private String currentView = null;
+    private Color selectedColor = new Color(200, 220, 240);
+    private Color normalColor = Color.WHITE;
+
+    // ここをフィールドに変更（ログイン状態で更新したいので）
+    private JLabel usernameLabel;
+    private JLabel groupLabel;
+    private JButton logoutButton;
 
     public HomePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
-        // HomePanel 自体のレイアウトを BorderLayout に設定
         setLayout(new BorderLayout());
 
         // --- ヘッダー ---
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
-        headerPanel.setBackground(new Color(60, 141, 188)); // #3c8dbc
+        headerPanel.setBackground(new Color(60, 141, 188));
 
-        JLabel usernameLabel = new JLabel("ユーザー名：田中 太郎");
-        JLabel groupLabel = new JLabel("グループ：家族共有");
-        JButton logoutButton = new JButton("ログアウト");
+        usernameLabel = new JLabel("ログインしていません");
+        groupLabel = new JLabel("");
+        logoutButton = new JButton("ログアウト");
 
         usernameLabel.setForeground(Color.WHITE);
         groupLabel.setForeground(Color.WHITE);
+        logoutButton.setFocusPainted(false);
 
         headerPanel.add(usernameLabel);
         headerPanel.add(groupLabel);
         headerPanel.add(logoutButton);
 
+        logoutButton.addActionListener(e -> {
+            setUserInfo(null, null);  // ログアウト処理
+        });
+
         // --- 左メニュー ---
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(new Color(244, 244, 244));
-        menuPanel.setPreferredSize(new Dimension(200, 600));  // 600は任意
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        menuPanel.setBackground(new Color(245, 245, 245));
+        menuPanel.setPreferredSize(new Dimension(220, 600));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
-        String[] menuItems = {
-            "データ登録", "データ抽出（カレンダー）",
-            "インポート/エクスポート", "グループ管理"
+        String[][] menuItems = {
+            { "📋データ登録", "register"},
+            {"🗓データ抽出（カレンダー）", "calendar"},
+            {"📁インポート / エクスポート", "importexport"},
+            {"👥グループ管理", "group"}
         };
+        Font btnFont = new Font("SansSerif", Font.BOLD, 12);
+        for (String[] item : menuItems) {
+            String label = item[0];
+            String name = item[1];
 
-        for (String item : menuItems) {
-            JButton btn = new JButton(item);
+            JButton btn = new JButton(label);
+            btn.setFont(btnFont); 
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
             btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            btn.setBackground(normalColor);
+            btn.setFocusPainted(false);
+
+            btn.addActionListener(e -> {
+                setActiveMenu(name);
+                animateSwitchView(name);
+            });
+
+            menuButtons.put(name, btn);
             menuPanel.add(btn);
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+            JPanel page = createPage(label + "画面です。");
+            page.setVisible(false);
+            views.put(name, page);
         }
 
-        // --- 中央コンテンツ ---
-        JPanel mainContent = new JPanel();
-        mainContent.setBackground(Color.WHITE);
-        JLabel placeholder = new JLabel("ここに機能画面が表示されます");
-        mainContent.add(placeholder);
+        // --- メインビュー（切り替え対象） ---
+        viewPanel = new JPanel(null);
+        viewPanel.setBackground(Color.WHITE);
+        for (JPanel panel : views.values()) {
+            viewPanel.add(panel);
+        }
 
-        // --- 配置 ---
+        // 初期表示
+        setActiveMenu("register");
+        views.get("register").setBounds(0, 0, 1000, 1000);
+        views.get("register").setVisible(true);
+        currentView = "register";
+
+        // 初期はログアウト状態（ログインしていません表示）
+        setUserInfo(null, null);
+
+        // --- 全体配置 ---
         add(headerPanel, BorderLayout.NORTH);
         add(menuPanel, BorderLayout.WEST);
-        add(mainContent, BorderLayout.CENTER);
+        add(viewPanel, BorderLayout.CENTER);
+    }
+
+    // ユーザー情報の表示を切り替えるメソッド
+    public void setUserInfo(String username, String group) {
+        if (username == null || username.isEmpty()) {
+            usernameLabel.setText("ログインしていません");
+            groupLabel.setText("");
+            logoutButton.setEnabled(false);
+        } else {
+            usernameLabel.setText("ユーザー名：" + username);
+            groupLabel.setText("グループ：" + (group == null ? "" : group));
+            logoutButton.setEnabled(true);
+        }
+    }
+
+    // ラベルだけの中央表示画面を作る
+    private JPanel createPage(String text) {
+        JPanel panel = new JPanel(new BorderLayout());
+        JLabel label = new JLabel(text, SwingConstants.CENTER);
+        label.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        label.setForeground(new Color(80, 80, 80));
+        panel.add(label, BorderLayout.CENTER);
+        panel.setBackground(Color.WHITE);
+        return panel;
+    }
+
+    // ボタンの見た目変更
+    private void setActiveMenu(String name) {
+        for (String key : menuButtons.keySet()) {
+            JButton btn = menuButtons.get(key);
+            btn.setBackground(key.equals(name) ? selectedColor : normalColor);
+        }
+    }
+
+    // アニメーションで画面切り替え
+    private void animateSwitchView(String nextName) {
+        if (nextName.equals(currentView)) return;
+
+        JPanel current = views.get(currentView);
+        JPanel next = views.get(nextName);
+        int width = viewPanel.getWidth();
+
+        current.setBounds(0, 0, width, viewPanel.getHeight());
+        next.setBounds(width, 0, width, viewPanel.getHeight());
+        next.setVisible(true);
+
+        Timer timer = new Timer(5, null);
+        final int[] x = {0};
+
+        timer.addActionListener(e -> {
+            x[0] += 20;
+            current.setLocation(-x[0], 0);
+            next.setLocation(width - x[0], 0);
+
+            if (x[0] >= width) {
+                timer.stop();
+                current.setVisible(false);
+                next.setLocation(0, 0);
+                currentView = nextName;
+            }
+        });
+
+        timer.start();
+    }
+
+    // 起動用 main（テスト）
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            MainFrame frame = new MainFrame();
+            HomePanel panel = new HomePanel(frame);
+
+            // テストでログイン情報をセット（コメントアウトして試してみてください）
+            // panel.setUserInfo("田中 太郎", "家族共有");
+
+            frame.setContentPane(panel);
+            frame.setSize(900, 600);
+            frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
     }
 }
+
