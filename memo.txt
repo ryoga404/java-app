@@ -1,12 +1,52 @@
-error: Your local changes to the following files would be overwritten by merge:
-  Sample.java
-Please commit your changes or stash them before you merge.
-Aborting
+import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 
-みたいなエラーが出るとき、
+public class LoginPanel extends JPanel {
+    private MainFrame mainFrame;
 
-git stash          # 一時的に変更を退避（作業内容はメモリの中に保存される）
-git pull origin main  # リモートの変更を問題なく取り込む
-git stash pop      # 退避した自分の変更を元に戻す（競合があればここで出る）
+    public LoginPanel(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
 
-２人以上が同じファイル・行の編集はしない
+        setLayout(new GridLayout(3, 2));
+
+        JTextField idField = new JTextField();
+        JTextField passField = new JTextField();
+
+        JButton loginBtn = new JButton("ログイン");
+        JButton backBtn = new JButton("TOPへ戻る");
+
+        loginBtn.addActionListener((ActionEvent e) -> {
+            String userId = idField.getText();
+            String password = passField.getText();
+
+            // ユーザー認証
+            UserDAO userDAO = new UserDAO();
+            boolean isLoginSuccess = userDAO.login(userId, password);
+
+            if (isLoginSuccess) {
+                // セッション生成
+                SessionDAO sessionDAO = new SessionDAO();
+                String sessionId = sessionDAO.createSession(userId);
+
+                if (sessionId != null) {
+                    mainFrame.setSessionId(sessionId);
+                    mainFrame.showPanel("home");
+                } else {
+                    JOptionPane.showMessageDialog(this, "セッションの作成に失敗しました。");
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "ログイン失敗。ユーザーIDまたはパスワードが正しくありません。");
+            }
+        });
+
+        backBtn.addActionListener(e -> mainFrame.showPanel("top"));
+
+        add(new JLabel("ユーザーID"));
+        add(idField);
+        add(new JLabel("パスワード"));
+        add(passField);
+        add(loginBtn);
+        add(backBtn);
+    }
+}
