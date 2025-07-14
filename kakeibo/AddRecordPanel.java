@@ -1,22 +1,10 @@
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.awt.*;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 public class AddRecordPanel extends JPanel {
 
@@ -27,57 +15,76 @@ public class AddRecordPanel extends JPanel {
     private JTextField amountField;
     private JTextField memoField;
 
+    private JLabel userInfoLabel;
     private Map<String, Integer> categoryMap = new LinkedHashMap<>();
     private RecordDAO recordDAO = new RecordDAO();
 
     public AddRecordPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+
+        // --- ヘッダー（ログインユーザー名 + ログアウト） ---
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        userInfoLabel = new JLabel();
+        JButton logoutButton = new JButton("ログアウト");
+
+        logoutButton.addActionListener(e -> {
+            if (mainFrame != null) {
+                mainFrame.logout();
+            }
+        });
+
+        headerPanel.add(userInfoLabel);
+        headerPanel.add(logoutButton);
+        add(headerPanel, BorderLayout.NORTH);
+
+        // --- 入力フォーム部分 ---
+        JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
         // 日付
         gbc.gridx = 0; gbc.gridy = 0;
-        add(new JLabel("日付 (yyyy-MM-dd):"), gbc);
+        formPanel.add(new JLabel("日付 (yyyy-MM-dd):"), gbc);
         dateField = new JTextField(10);
         dateField.setText(LocalDate.now().toString());
         gbc.gridx = 1;
-        add(dateField, gbc);
+        formPanel.add(dateField, gbc);
 
         // カテゴリ
         gbc.gridx = 0; gbc.gridy++;
-        add(new JLabel("カテゴリ:"), gbc);
+        formPanel.add(new JLabel("カテゴリ:"), gbc);
         categoryCombo = new JComboBox<>();
         gbc.gridx = 1;
-        add(categoryCombo, gbc);
+        formPanel.add(categoryCombo, gbc);
 
         // タイプ
         gbc.gridx = 0; gbc.gridy++;
-        add(new JLabel("タイプ:"), gbc);
+        formPanel.add(new JLabel("タイプ:"), gbc);
         typeCombo = new JComboBox<>(new String[]{"In", "Out"});
         gbc.gridx = 1;
-        add(typeCombo, gbc);
+        formPanel.add(typeCombo, gbc);
 
         // 金額
         gbc.gridx = 0; gbc.gridy++;
-        add(new JLabel("金額:"), gbc);
+        formPanel.add(new JLabel("金額:"), gbc);
         amountField = new JTextField(10);
         gbc.gridx = 1;
-        add(amountField, gbc);
+        formPanel.add(amountField, gbc);
 
         // メモ
         gbc.gridx = 0; gbc.gridy++;
-        add(new JLabel("メモ:"), gbc);
+        formPanel.add(new JLabel("メモ:"), gbc);
         memoField = new JTextField(20);
         gbc.gridx = 1;
-        add(memoField, gbc);
+        formPanel.add(memoField, gbc);
 
         // 登録ボタン
         gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
         JButton addButton = new JButton("登録");
-        add(addButton, gbc);
+        formPanel.add(addButton, gbc);
 
         addButton.addActionListener(e -> {
             try {
@@ -87,7 +94,34 @@ public class AddRecordPanel extends JPanel {
             }
         });
 
+        add(formPanel, BorderLayout.CENTER);
         loadCategoriesFromDB();
+    }
+
+    public void refreshUserInfo() {
+        String sessionId = mainFrame.getSessionId();
+        String userName = getUserNameFromSession(sessionId);
+        userInfoLabel.setText("ログイン中: " + userName);
+    }
+
+    private String getUserNameFromSession(String sessionId) {
+        if (sessionId == null) return "未ログイン";
+
+        SessionDAO sessionDAO = new SessionDAO();
+        String userId = sessionDAO.getUserIdBySession(sessionId);
+        if (userId == null) return "未ログイン";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT userName FROM User WHERE userId = ?")) {
+            stmt.setString(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("userName");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "未ログイン";
     }
 
     private void loadCategoriesFromDB() {
@@ -137,14 +171,11 @@ public class AddRecordPanel extends JPanel {
         if (categoryName == null || !categoryMap.containsKey(categoryName)) {
             throw new IllegalArgumentException("カテゴリが選択されていないか無効です。");
         }
-        int categoryId = categoryMap.get(categoryName);
 
-        // セッションID取得
+        int categoryId = categoryMap.get(categoryName);
         String sessionId = mainFrame.getSessionId();
 
-        // 登録実行
-        boolean success = recordDAO.addRecord(
-                sessionId, Date.valueOf(date), categoryId, type, amount, memo);
+        boolean success = recordDAO.addRecord(sessionId, Date.valueOf(date), categoryId, type, amount, memo);
 
         if (success) {
             JOptionPane.showMessageDialog(this, "登録成功！");
