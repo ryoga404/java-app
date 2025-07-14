@@ -1,4 +1,8 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -7,7 +11,7 @@ public class SessionDAO {
     // セッション生成＋DB登録し、sessionIdを返す
     public String createSession(String userId) {
         String sessionId = UUID.randomUUID().toString();
-        String sql = "INSERT INTO Session (session_id, user_id, login_time) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Session (SessionId, UserId, LoginTime) VALUES (?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, sessionId);
