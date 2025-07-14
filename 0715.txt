@@ -1,0 +1,13 @@
+（共通）
+GitBash起動
+　cd /C/Users/mid/
+  source .bashrc (password:password)
+  cd Desktop/java-app
+  git remote set-url origin git@github.com:ryoga404/java-app.git
+  git pull origin main
+
+0715
+レイアウト修正作業
+Mainメソッド（仮の）作成
+
+
