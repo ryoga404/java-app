@@ -12,6 +12,10 @@ public class CheckPassword {
         	"6b3a55e0261b0304143f805a24924d0c1c44524821305f31d9277843b8a10f4e"
     );
 
+    // 追加：特殊文字セット（例）
+    private static final Set<Character> specialChars = Set.of(
+        '!','#','_','@'
+    );
  
     public static String validate(String password, String userName) {
         if (password == null || password.isEmpty()) {
@@ -37,6 +41,10 @@ public class CheckPassword {
         
         if (!containsUpperLowerDigit(password)) {
         	return "パスワードは英大文字・小文字・数字を１つ以上含んでください";
+        }
+
+        if (!containsSpecialChar(password)) {
+            return "パスワードは特殊文字（例: !#@_）を１つ以上含んでください。";
         }
 
         return null; // 問題なし
@@ -71,6 +79,16 @@ public class CheckPassword {
             }
         }
 
+        return false;
+    }
+
+    // 追加：特殊文字含有チェック
+    private static boolean containsSpecialChar(String password) {
+        for (char c : password.toCharArray()) {
+            if (specialChars.contains(c)) {
+                return true;
+            }
+        }
         return false;
     }
 
