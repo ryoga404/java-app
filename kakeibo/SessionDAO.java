@@ -27,7 +27,7 @@ public class SessionDAO {
 
     // セッション有効チェック
     public boolean isSessionValid(String sessionId) {
-        String sql = "SELECT 1 FROM Session WHERE session_id = ?";
+        String sql = "SELECT 1 FROM Session WHERE SessionId = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, sessionId);
@@ -41,13 +41,13 @@ public class SessionDAO {
 
     // セッションIDからユーザーID取得
     public String getUserIdBySession(String sessionId) {
-        String sql = "SELECT user_id FROM Session WHERE session_id = ?";
+        String sql = "SELECT userId FROM Session WHERE SessionId = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, sessionId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getString("user_id");
+                return rs.getString("UserId");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -57,7 +57,7 @@ public class SessionDAO {
 
     // セッション削除（ログアウト）
     public boolean deleteSession(String sessionId) {
-        String sql = "DELETE FROM Session WHERE session_id = ?";
+        String sql = "DELETE FROM Session WHERE SessionId = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, sessionId);
