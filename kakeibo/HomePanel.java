@@ -27,10 +27,11 @@ public class HomePanel extends JPanel {
     private Color selectedColor = new Color(200, 220, 240);
     private Color normalColor = Color.WHITE;
 
-    // ここをフィールドに変更（ログイン状態で更新したいので）
     private JLabel usernameLabel;
     private JLabel groupLabel;
     private JButton logoutButton;
+
+    private String sessionId; // セッションIDを保持
 
     public HomePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -53,7 +54,21 @@ public class HomePanel extends JPanel {
         headerPanel.add(logoutButton);
 
         logoutButton.addActionListener(e -> {
-            setUserInfo(null, null);  // ログアウト処理
+            if (sessionId != null) {
+                SessionDAO sessionDAO = new SessionDAO();
+                boolean deleted = sessionDAO.deleteSession(sessionId);
+                if (deleted) {
+                    System.out.println("セッション削除成功：" + sessionId);
+                } else {
+                    System.err.println("セッション削除失敗：" + sessionId);
+                }
+            }
+
+            setUserInfo(null, null, null);  // ログアウト状態に戻す
+            if (mainFrame != null) {
+                mainFrame.setSessionId(null);
+                mainFrame.showPanel("TOP");
+            }
         });
 
         // --- 左メニュー ---
@@ -64,18 +79,19 @@ public class HomePanel extends JPanel {
         menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         String[][] menuItems = {
-            { "📋データ登録", "register"},
+            {"📋データ登録", "register"},
             {"🗓データ抽出（カレンダー）", "calendar"},
             {"📁インポート / エクスポート", "importexport"},
             {"👥グループ管理", "group"}
         };
+
         Font btnFont = new Font("SansSerif", Font.BOLD, 12);
         for (String[] item : menuItems) {
             String label = item[0];
             String name = item[1];
 
             JButton btn = new JButton(label);
-            btn.setFont(btnFont); 
+            btn.setFont(btnFont);
             btn.setAlignmentX(Component.CENTER_ALIGNMENT);
             btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
             btn.setBackground(normalColor);
@@ -108,8 +124,8 @@ public class HomePanel extends JPanel {
         views.get("register").setVisible(true);
         currentView = "register";
 
-        // 初期はログアウト状態（ログインしていません表示）
-        setUserInfo(null, null);
+        // 初期はログアウト状態
+        setUserInfo(null, null, null);
 
         // --- 全体配置 ---
         add(headerPanel, BorderLayout.NORTH);
@@ -117,8 +133,9 @@ public class HomePanel extends JPanel {
         add(viewPanel, BorderLayout.CENTER);
     }
 
-    // ユーザー情報の表示を切り替えるメソッド
-    public void setUserInfo(String username, String group) {
+    // ユーザー情報・セッションIDを表示・保持するメソッド
+    public void setUserInfo(String username, String group, String sessionId) {
+        this.sessionId = sessionId;
         if (username == null || username.isEmpty()) {
             usernameLabel.setText("ログインしていません");
             groupLabel.setText("");
@@ -128,6 +145,11 @@ public class HomePanel extends JPanel {
             groupLabel.setText("グループ：" + (group == null ? "" : group));
             logoutButton.setEnabled(true);
         }
+    }
+
+    // 旧 setUserInfo もサポート（オーバーロード）
+    public void setUserInfo(String username, String group) {
+        setUserInfo(username, group, null);
     }
 
     // ラベルだけの中央表示画面を作る
@@ -186,8 +208,8 @@ public class HomePanel extends JPanel {
             MainFrame frame = new MainFrame();
             HomePanel panel = new HomePanel(frame);
 
-            // テストでログイン情報をセット（コメントアウトして試してみてください）
-            // panel.setUserInfo("田中 太郎", "家族共有");
+            // テストログイン情報（任意で有効に）
+            // panel.setUserInfo("田中 太郎", "家族共有", "dummy-session-id");
 
             frame.setContentPane(panel);
             frame.setSize(900, 600);
@@ -197,4 +219,3 @@ public class HomePanel extends JPanel {
         });
     }
 }
-
