@@ -72,3 +72,29 @@ INSERT INTO category (CategoryName) VALUES
 ('雑費'),
 ('通信費'),
 ('その他');
+
+-- 既存データの文字化けを直すためのUPDATE文（latin1 → utf8mb4変換）
+-- ※ 新規作成直後は必要ありません。既存の古いデータがある場合のみ実行してください。
+
+UPDATE `category` SET `CategoryName` = CONVERT(BINARY CONVERT(`CategoryName` USING latin1) USING utf8mb4);
+UPDATE `groupmember` SET `UserId` = CONVERT(BINARY CONVERT(`UserId` USING latin1) USING utf8mb4);
+UPDATE `grouptable` SET `GroupName` = CONVERT(BINARY CONVERT(`GroupName` USING latin1) USING utf8mb4);
+UPDATE `record` SET `UserId` = CONVERT(BINARY CONVERT(`UserId` USING latin1) USING utf8mb4);
+UPDATE `record` SET `Type` = CONVERT(BINARY CONVERT(`Type` USING latin1) USING utf8mb4);
+UPDATE `record` SET `Memo` = CONVERT(BINARY CONVERT(`Memo` USING latin1) USING utf8mb4);
+UPDATE `salt` SET `UserId` = CONVERT(BINARY CONVERT(`UserId` USING latin1) USING utf8mb4);
+UPDATE `salt` SET `Salt` = CONVERT(BINARY CONVERT(`Salt` USING latin1) USING utf8mb4);
+UPDATE `session` SET `SessionId` = CONVERT(BINARY CONVERT(`SessionId` USING latin1) USING utf8mb4);
+UPDATE `session` SET `UserId` = CONVERT(BINARY CONVERT(`UserId` USING latin1) USING utf8mb4);
+UPDATE `user` SET `UserId` = CONVERT(BINARY CONVERT(`UserId` USING latin1) USING utf8mb4);
+UPDATE `user` SET `HashedPassword` = CONVERT(BINARY CONVERT(`HashedPassword` USING latin1) USING utf8mb4);
+
+INSERT INTO category (CategoryName) VALUES
+('家賃'),
+('電気代'),
+('水道代'),
+('ガス代'),
+('食費'),
+('雑費'),
+('通信費'),
+('その他');

@@ -22,3 +22,5 @@
 /RecordDAO$Record.class
 /CategorySelector.class
 
+/CheckUserName.class
+/CheckPassword.class
