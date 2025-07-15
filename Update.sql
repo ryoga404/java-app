@@ -1,74 +1,74 @@
--- データベースが存在しなければ作成（任意）
-CREATE DATABASE IF NOT EXISTS kakeibo
-    DEFAULT CHARACTER SET utf8mb4
-    DEFAULT COLLATE utf8mb4_general_ci;
+-- データベースが存在する場合は削除
+DROP DATABASE IF EXISTS kakeibo;
 
--- 使用するデータベース指定
+-- UTF-8（utf8mb4）でデータベース作成
+CREATE DATABASE kakeibo CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+-- 使用するデータベースを指定
 USE kakeibo;
 
--- ユーザテーブル
-CREATE TABLE IF NOT EXISTS User (
-    UserId VARCHAR(20) NOT NULL PRIMARY KEY,
-    Salt VARCHAR(64) NOT NULL,
-    HashedPassword VARCHAR(64) NOT NULL
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+-- ユーザーテーブル
+CREATE TABLE user (
+    UserId VARCHAR(50) PRIMARY KEY,
+    HashedPassword VARCHAR(255) NOT NULL
+) CHARACTER SET utf8mb4;
 
--- 家計簿レコードテーブル
-CREATE TABLE IF NOT EXISTS Record (
-    RecordId INT AUTO_INCREMENT PRIMARY KEY,
-    UserId VARCHAR(20) NOT NULL,
-    Date DATE NOT NULL,
-    CategoryId INT NOT NULL,
-    Type ENUM('INCOME', 'EXPENSE') NOT NULL,
-    Amount INT NOT NULL,
-    Memo VARCHAR(100),
-    FOREIGN KEY (UserId) REFERENCES User(UserId)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+-- ソルトテーブル
+CREATE TABLE salt (
+    UserId VARCHAR(50) PRIMARY KEY,
+    Salt VARCHAR(255) NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES user(UserId)
+) CHARACTER SET utf8mb4;
+
+-- セッションテーブル
+CREATE TABLE session (
+    SessionId VARCHAR(255) PRIMARY KEY,
+    UserId VARCHAR(50),
+    LoginTime DATETIME NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES user(UserId)
+) CHARACTER SET utf8mb4;
 
 -- カテゴリテーブル
-CREATE TABLE IF NOT EXISTS Category (
+CREATE TABLE category (
     CategoryId INT AUTO_INCREMENT PRIMARY KEY,
-    CategoryName VARCHAR(50) NOT NULL
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    CategoryName VARCHAR(100) NOT NULL
+) CHARACTER SET utf8mb4;
+
+-- レコードテーブル
+CREATE TABLE record (
+    RecordId INT AUTO_INCREMENT PRIMARY KEY,
+    UserId VARCHAR(50),
+    Date DATE NOT NULL,
+    CategoryId INT,
+    Type VARCHAR(10),
+    Amount INT,
+    Memo TEXT,
+    FOREIGN KEY (UserId) REFERENCES user(UserId),
+    FOREIGN KEY (CategoryId) REFERENCES category(CategoryId)
+) CHARACTER SET utf8mb4;
 
 -- グループテーブル
-CREATE TABLE IF NOT EXISTS GroupTable (
+CREATE TABLE grouptable (
     GroupId INT AUTO_INCREMENT PRIMARY KEY,
-    GroupName VARCHAR(50) NOT NULL,
-    OwnerUserId VARCHAR(20) NOT NULL,
-    FOREIGN KEY (OwnerUserId) REFERENCES User(UserId)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    GroupName VARCHAR(100) NOT NULL
+) CHARACTER SET utf8mb4;
 
 -- グループメンバーテーブル
-CREATE TABLE IF NOT EXISTS GroupMember (
-    GroupMemberId INT AUTO_INCREMENT PRIMARY KEY,
-    GroupId INT NOT NULL,
-    UserId VARCHAR(20) NOT NULL,
-    FOREIGN KEY (GroupId) REFERENCES GroupTable(GroupId),
-    FOREIGN KEY (UserId) REFERENCES User(UserId)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE TABLE groupmember (
+    GroupId INT,
+    UserId VARCHAR(50),
+    PRIMARY KEY (GroupId, UserId),
+    FOREIGN KEY (GroupId) REFERENCES grouptable(GroupId),
+    FOREIGN KEY (UserId) REFERENCES user(UserId)
+) CHARACTER SET utf8mb4;
 
--- もし salt や session テーブルも使っているなら仮に作成
-CREATE TABLE IF NOT EXISTS Salt (
-    UserId VARCHAR(20) NOT NULL PRIMARY KEY,
-    SaltValue VARCHAR(64) NOT NULL
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
-CREATE TABLE IF NOT EXISTS Session (
-    SessionId VARCHAR(64) PRIMARY KEY,
-    UserId VARCHAR(20) NOT NULL,
-    Expiry DATETIME NOT NULL,
-    FOREIGN KEY (UserId) REFERENCES User(UserId)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
--- 既存のテーブルがある場合も、文字コードを統一
-ALTER DATABASE kakeibo CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
-
-ALTER TABLE Category     CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-ALTER TABLE GroupMember  CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-ALTER TABLE GroupTable   CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-ALTER TABLE Record       CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-ALTER TABLE Salt         CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-ALTER TABLE Session      CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-ALTER TABLE User         CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
+-- 初期カテゴリデータ挿入
+INSERT INTO category (CategoryName) VALUES
+('家賃'),
+('電気代'),
+('水道代'),
+('ガス代'),
+('食費'),
+('雑費'),
+('通信費'),
+('その他');
