@@ -1,4 +1,5 @@
 -- データベースの文字コードを utf8mb4 に変更
+USE kakeibo;
 ALTER DATABASE kakeibo CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
 -- 各テーブルの文字コードを utf8mb4 に変更
