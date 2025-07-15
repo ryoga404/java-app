@@ -10,11 +10,9 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class HomePanel extends JPanel {
@@ -48,6 +46,7 @@ public class HomePanel extends JPanel {
         usernameLabel.setForeground(Color.WHITE);
         groupLabel.setForeground(Color.WHITE);
         logoutButton.setFocusPainted(false);
+        logoutButton.setEnabled(false); // 初期は無効
 
         headerPanel.add(usernameLabel);
         headerPanel.add(groupLabel);
@@ -80,7 +79,7 @@ public class HomePanel extends JPanel {
         menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         String[][] menuItems = {
-            {"📋データ登録", "register"},
+            {"📋データ登録", "addRecord"},
             {"🗓データ抽出（カレンダー）", "calendar"},
             {"📁インポート / エクスポート", "importexport"},
             {"👥グループ管理", "group"}
@@ -100,8 +99,8 @@ public class HomePanel extends JPanel {
 
             btn.addActionListener(e -> {
                 setActiveMenu(name);
-                if (name.equals("register")) {
-                    // MainFrame に遷移を依頼
+                if (name.equals("addRecord")) {
+                    // MainFrameに遷移依頼（データ登録画面）
                     mainFrame.showPanel("addRecord");
                 } else {
                     animateSwitchView(name);
@@ -112,7 +111,7 @@ public class HomePanel extends JPanel {
             menuPanel.add(btn);
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-            if (!name.equals("register")) {
+            if (!name.equals("addRecord")) {
                 JPanel page = createPage(label + "画面です。");
                 page.setVisible(false);
                 views.put(name, page);
@@ -126,7 +125,7 @@ public class HomePanel extends JPanel {
             viewPanel.add(panel);
         }
 
-        // 初期表示（registerはMainFrame側で開くので初期はcalendarなどにしておく）
+        // 初期表示（addRecordはMainFrameで管理するので除外）
         setActiveMenu("calendar");
         if (views.containsKey("calendar")) {
             views.get("calendar").setBounds(0, 0, 1000, 1000);
@@ -168,8 +167,8 @@ public class HomePanel extends JPanel {
         JLabel label = new JLabel(text, SwingConstants.CENTER);
         label.setFont(new Font("SansSerif", Font.PLAIN, 16));
         label.setForeground(new Color(80, 80, 80));
-        panel.add(label, BorderLayout.CENTER);
         panel.setBackground(Color.WHITE);
+        panel.add(label, BorderLayout.CENTER);
         return panel;
     }
 
@@ -210,18 +209,5 @@ public class HomePanel extends JPanel {
         });
 
         timer.start();
-    }
-
-    // テスト起動用 main（任意で使ってOK）
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame();
-            HomePanel panel = new HomePanel(frame);
-            frame.setContentPane(panel);
-            frame.setSize(900, 600);
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setVisible(true);
-        });
     }
 }

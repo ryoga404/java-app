@@ -18,26 +18,21 @@ public class LoginPanel extends JPanel {
         // レイアウトを設定
         setLayout(new GridLayout(3, 2));
 
-        // IDのテキストフィールド
+        // IDとパスワード入力フィールド
         JTextField idField = new JTextField();
-
-        // パスワードのフィールドを JPasswordField に変更
         JPasswordField passField = new JPasswordField();
 
-        // ログインボタン
+        // ボタン作成
         JButton loginBtn = new JButton("ログイン");
-
-        // TOPに戻るボタン
         JButton backBtn = new JButton("TOPへ戻る");
 
-        // ログインボタンのアクションリスナー
+        // ログインボタンのアクション
         loginBtn.addActionListener(e -> {
             String userId = idField.getText().trim();
-            char[] password = passField.getPassword();  // JPasswordField から char[] を取得
+            char[] password = passField.getPassword();
 
             UserDAO userDAO = new UserDAO();
-            // パスワードは char[] で渡す
-            String isLoginSuccess = userDAO.login(userId, new String(password));  // char[] から String に変換
+            String isLoginSuccess = userDAO.login(userId, new String(password)); // 成功時は非nullを想定
 
             if (isLoginSuccess != null) {
                 SessionDAO sessionDAO = new SessionDAO();
@@ -45,6 +40,7 @@ public class LoginPanel extends JPanel {
 
                 if (sessionId != null) {
                     if (mainFrame != null) {
+                        mainFrame.setCurrentUserId(userId);       // ← これを忘れない！
                         mainFrame.setSessionId(sessionId);
                         mainFrame.showPanel("home");
                     }
@@ -57,16 +53,16 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        // TOPに戻るボタン
+        // TOPへ戻るボタンのアクション
         backBtn.addActionListener(e -> {
             if (mainFrame != null) {
-                mainFrame.showPanel("TOP");
+                mainFrame.showPanel("top");
             } else {
                 JOptionPane.showMessageDialog(this, "TOPへ戻ります（ダミー）");
             }
         });
 
-        // UI 部品をカードに追加
+        // UI 部品の追加
         add(new JLabel("ユーザーID"));
         add(idField);
         add(new JLabel("パスワード"));
@@ -75,7 +71,7 @@ public class LoginPanel extends JPanel {
         add(backBtn);
     }
 
-    // テスト用 main メソッド（MainFrame 不要で確認可能）
+    // テスト起動用
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("ログイン画面テスト");
