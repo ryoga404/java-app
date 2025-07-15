@@ -4,6 +4,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 //ユーザ名とパスワードを入力するフォームとボタン
@@ -18,7 +19,7 @@ public class LoginPanel extends JPanel {
     	//IDのテキストフィールド
     	JTextField idField = new JTextField();
     	//パスワードのテキストフィールド
-    	JTextField passField = new JTextField();
+    	JPasswordField passField = new JPasswordField();
     	
         //登録ボタン
     	JButton  loginBtn = new JButton("ログイン");
@@ -27,12 +28,12 @@ public class LoginPanel extends JPanel {
     	
     	//ログインボタンが押されたら
     	loginBtn.addActionListener(e -> {
-    		String userId = idField.getText();
-            String password = passField.getText();
+            String userId = idField.getText();
+            char[] password = passField.getPassword();  // パスワードをchar[]として取得
 
             // ユーザー認証
             UserDAO userDAO = new UserDAO();
-            String isLoginSuccess = userDAO.login(userId, password);
+            String isLoginSuccess = userDAO.login(userId, new String(password));  // char[]からStringへ変換
 
             if (isLoginSuccess != null) {
                 // セッション生成
@@ -49,12 +50,12 @@ public class LoginPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "ログイン失敗。ユーザーIDまたはパスワードが正しくありません。");
             }
         });
-    	
-    	//TOPに戻るボタン
-    	backBtn.addActionListener(e -> mainFrame.showPanel("TOP"));
-    	
-    	//カードに部品を追加
-    	add(new JLabel("ユーザーID"));
+        
+        // TOPに戻るボタン
+        backBtn.addActionListener(e -> mainFrame.showPanel("top"));
+        
+        // カードに部品を追加
+        add(new JLabel("ユーザーID"));
         add(idField);
         add(new JLabel("パスワード"));
         add(passField);
