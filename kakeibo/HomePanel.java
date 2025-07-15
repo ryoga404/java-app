@@ -67,7 +67,8 @@ public class HomePanel extends JPanel {
             setUserInfo(null, null, null);  // ログアウト状態に戻す
             if (mainFrame != null) {
                 mainFrame.setSessionId(null);
-                mainFrame.showPanel("TOP");
+                mainFrame.setCurrentUserId(null);
+                mainFrame.showPanel("top");
             }
         });
 
@@ -99,16 +100,23 @@ public class HomePanel extends JPanel {
 
             btn.addActionListener(e -> {
                 setActiveMenu(name);
-                animateSwitchView(name);
+                if (name.equals("register")) {
+                    // MainFrame に遷移を依頼
+                    mainFrame.showPanel("addRecord");
+                } else {
+                    animateSwitchView(name);
+                }
             });
 
             menuButtons.put(name, btn);
             menuPanel.add(btn);
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-            JPanel page = createPage(label + "画面です。");
-            page.setVisible(false);
-            views.put(name, page);
+            if (!name.equals("register")) {
+                JPanel page = createPage(label + "画面です。");
+                page.setVisible(false);
+                views.put(name, page);
+            }
         }
 
         // --- メインビュー（切り替え対象） ---
@@ -118,11 +126,13 @@ public class HomePanel extends JPanel {
             viewPanel.add(panel);
         }
 
-        // 初期表示
-        setActiveMenu("register");
-        views.get("register").setBounds(0, 0, 1000, 1000);
-        views.get("register").setVisible(true);
-        currentView = "register";
+        // 初期表示（registerはMainFrame側で開くので初期はcalendarなどにしておく）
+        setActiveMenu("calendar");
+        if (views.containsKey("calendar")) {
+            views.get("calendar").setBounds(0, 0, 1000, 1000);
+            views.get("calendar").setVisible(true);
+            currentView = "calendar";
+        }
 
         // 初期はログアウト状態
         setUserInfo(null, null, null);
@@ -147,7 +157,7 @@ public class HomePanel extends JPanel {
         }
     }
 
-    // 旧 setUserInfo もサポート（オーバーロード）
+    // オーバーロード（セッションIDなし）
     public void setUserInfo(String username, String group) {
         setUserInfo(username, group, null);
     }
@@ -163,7 +173,7 @@ public class HomePanel extends JPanel {
         return panel;
     }
 
-    // ボタンの見た目変更
+    // メニューの見た目変更
     private void setActiveMenu(String name) {
         for (String key : menuButtons.keySet()) {
             JButton btn = menuButtons.get(key);
@@ -171,7 +181,7 @@ public class HomePanel extends JPanel {
         }
     }
 
-    // アニメーションで画面切り替え
+    // アニメーションで画面切り替え（HomePanel内のもののみ）
     private void animateSwitchView(String nextName) {
         if (nextName.equals(currentView)) return;
 
@@ -202,15 +212,11 @@ public class HomePanel extends JPanel {
         timer.start();
     }
 
-    // 起動用 main（テスト）
+    // テスト起動用 main（任意で使ってOK）
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame();
             HomePanel panel = new HomePanel(frame);
-
-            // テストログイン情報（任意で有効に）
-            // panel.setUserInfo("田中 太郎", "家族共有", "dummy-session-id");
-
             frame.setContentPane(panel);
             frame.setSize(900, 600);
             frame.setLocationRelativeTo(null);

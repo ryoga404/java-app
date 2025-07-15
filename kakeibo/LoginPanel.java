@@ -46,7 +46,7 @@ public class LoginPanel extends JPanel {
                 if (sessionId != null) {
                     if (mainFrame != null) {
                         mainFrame.setSessionId(sessionId);
-                        mainFrame.showPanel("addRecord");
+                        mainFrame.showPanel("home");
                     }
                     JOptionPane.showMessageDialog(this, "ログイン成功！セッションID: " + sessionId);
                 } else {
