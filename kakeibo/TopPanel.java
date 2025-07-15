@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class TopPanel extends JPanel {
@@ -22,7 +21,7 @@ public class TopPanel extends JPanel {
         loginBtn.setMaximumSize(new Dimension(buttonMaxWidth, 40));
         loginBtn.setPreferredSize(new Dimension(buttonMaxWidth, 40));
         loginBtn.addActionListener((ActionEvent e) -> {
-            JOptionPane.showMessageDialog(this, "ログイン画面へ");
+            mainFrame.showPanel("login");
         });
 
         JButton registerBtn = new JButton("新規登録");
@@ -30,7 +29,7 @@ public class TopPanel extends JPanel {
         registerBtn.setMaximumSize(new Dimension(buttonMaxWidth, 40));
         registerBtn.setPreferredSize(new Dimension(buttonMaxWidth, 40));
         registerBtn.addActionListener((ActionEvent e) -> {
-            JOptionPane.showMessageDialog(this, "登録画面へ");
+            mainFrame.showPanel("register");
         });
 
         add(Box.createVerticalStrut(30));
