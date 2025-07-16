@@ -63,7 +63,7 @@ public class HomePanel extends JPanel {
                 }
             }
 
-            setUserInfo(null, null, null);  // ログアウト状態に戻す
+            setUserInfo(null, null, null);
             if (mainFrame != null) {
                 mainFrame.setSessionId(null);
                 mainFrame.setCurrentUserId(null);
@@ -100,7 +100,6 @@ public class HomePanel extends JPanel {
             btn.addActionListener(e -> {
                 setActiveMenu(name);
                 if (name.equals("addRecord")) {
-                    // MainFrameに遷移依頼（データ登録画面）
                     mainFrame.showPanel("addRecord");
                 } else {
                     animateSwitchView(name);
@@ -118,14 +117,12 @@ public class HomePanel extends JPanel {
             }
         }
 
-        // --- メインビュー（切り替え対象） ---
         viewPanel = new JPanel(null);
         viewPanel.setBackground(Color.WHITE);
         for (JPanel panel : views.values()) {
             viewPanel.add(panel);
         }
 
-        // 初期表示（addRecordはMainFrameで管理するので除外）
         setActiveMenu("calendar");
         if (views.containsKey("calendar")) {
             views.get("calendar").setBounds(0, 0, 1000, 1000);
@@ -133,35 +130,30 @@ public class HomePanel extends JPanel {
             currentView = "calendar";
         }
 
-        // 初期はログアウト状態
         setUserInfo(null, null, null);
 
-        // --- 全体配置 ---
         add(headerPanel, BorderLayout.NORTH);
         add(menuPanel, BorderLayout.WEST);
         add(viewPanel, BorderLayout.CENTER);
     }
 
-    // ユーザー情報・セッションIDを表示・保持するメソッド
-    public void setUserInfo(String username, String group, String sessionId) {
+    public void setUserInfo(String userId, String group, String sessionId) {
         this.sessionId = sessionId;
-        if (username == null || username.isEmpty()) {
+        if (userId == null || userId.isEmpty()) {
             usernameLabel.setText("ログインしていません");
             groupLabel.setText("");
             logoutButton.setEnabled(false);
         } else {
-            usernameLabel.setText("ユーザー名：" + username);
+            usernameLabel.setText("ユーザーID：" + userId);
             groupLabel.setText("グループ：" + (group == null ? "" : group));
             logoutButton.setEnabled(true);
         }
     }
 
-    // オーバーロード（セッションIDなし）
-    public void setUserInfo(String username, String group) {
-        setUserInfo(username, group, null);
+    public void setUserInfo(String userId, String group) {
+        setUserInfo(userId, group, null);
     }
 
-    // ラベルだけの中央表示画面を作る
     private JPanel createPage(String text) {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel(text, SwingConstants.CENTER);
@@ -172,7 +164,6 @@ public class HomePanel extends JPanel {
         return panel;
     }
 
-    // メニューの見た目変更
     private void setActiveMenu(String name) {
         for (String key : menuButtons.keySet()) {
             JButton btn = menuButtons.get(key);
@@ -180,7 +171,6 @@ public class HomePanel extends JPanel {
         }
     }
 
-    // アニメーションで画面切り替え（HomePanel内のもののみ）
     private void animateSwitchView(String nextName) {
         if (nextName.equals(currentView)) return;
 
@@ -192,7 +182,7 @@ public class HomePanel extends JPanel {
         next.setBounds(width, 0, width, viewPanel.getHeight());
         next.setVisible(true);
 
-        Timer timer = new Timer(5, null);
+        javax.swing.Timer timer = new javax.swing.Timer(5, null);
         final int[] x = {0};
 
         timer.addActionListener(e -> {

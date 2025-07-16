@@ -1,25 +1,16 @@
 import java.awt.*;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.*;
-import java.sql.SQLException;
-
 
 public class AddRecordPanel extends JPanel {
 
     private MainFrame mainFrame;
-    private JTextField dateField;
-    private JComboBox<String> categoryCombo;
-    private JComboBox<String> typeCombo;
-    private JTextField amountField;
-    private JTextField memoField;
-
+    private JTextField dateField, amountField, memoField;
+    private JComboBox<String> categoryCombo, typeCombo;
     private JLabel userInfoLabel;
     private Map<String, Integer> categoryMap = new LinkedHashMap<>();
 
@@ -30,36 +21,31 @@ public class AddRecordPanel extends JPanel {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
 
-        // ヘッダー
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        userInfoLabel = new JLabel();
-        JButton logoutButton = new JButton("ログアウト");
+        // --- ヘッダー ---
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
+        headerPanel.setBackground(new Color(60, 141, 188));
+
+        userInfoLabel = new JLabel("ログイン中: 未ログイン");
+        userInfoLabel.setForeground(Color.WHITE);
+        userInfoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
         JButton backToHome = new JButton("ホームへ");
-
-        logoutButton.addActionListener(e -> {
-            if (mainFrame != null) {
-                mainFrame.logout();
-            }
-        });
-
-        backToHome.addActionListener(e -> {
-            if (mainFrame != null) {
-                mainFrame.showPanel("home");
-            }
-        });
+        backToHome.setFocusPainted(false);
+        backToHome.setBackground(Color.WHITE);
+        backToHome.setForeground(Color.BLACK);
+        backToHome.setFont(new Font("SansSerif", Font.BOLD, 12));
+        backToHome.addActionListener(e -> mainFrame.showPanel("home"));
 
         headerPanel.add(userInfoLabel);
-        headerPanel.add(logoutButton);
         headerPanel.add(backToHome);
         add(headerPanel, BorderLayout.NORTH);
 
-        // 入力フォーム
+        // --- 入力フォーム ---
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // 日付
         gbc.gridx = 0; gbc.gridy = 0;
         formPanel.add(new JLabel("日付 (yyyy-MM-dd):"), gbc);
         dateField = new JTextField(10);
@@ -67,35 +53,30 @@ public class AddRecordPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(dateField, gbc);
 
-        // タイプ（収入 / 支出）
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(new JLabel("タイプ:"), gbc);
         typeCombo = new JComboBox<>(new String[]{"収入", "支出"});
         gbc.gridx = 1;
         formPanel.add(typeCombo, gbc);
 
-        // カテゴリ
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(new JLabel("カテゴリ:"), gbc);
         categoryCombo = new JComboBox<>();
         gbc.gridx = 1;
         formPanel.add(categoryCombo, gbc);
 
-        // 金額
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(new JLabel("金額:"), gbc);
         amountField = new JTextField(10);
         gbc.gridx = 1;
         formPanel.add(amountField, gbc);
 
-        // メモ
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(new JLabel("メモ:"), gbc);
         memoField = new JTextField(20);
         gbc.gridx = 1;
         formPanel.add(memoField, gbc);
 
-        // 登録ボタン
         gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
         JButton addButton = new JButton("登録");
@@ -103,16 +84,12 @@ public class AddRecordPanel extends JPanel {
 
         add(formPanel, BorderLayout.CENTER);
 
-        // タイプ選択変更時にカテゴリ更新
         typeCombo.addActionListener(e -> {
             String selectedType = (String) typeCombo.getSelectedItem();
             loadCategoriesByType(selectedType);
         });
-
-        // 初期カテゴリロード
         loadCategoriesByType((String) typeCombo.getSelectedItem());
 
-        // 登録処理
         addButton.addActionListener(e -> {
             try {
                 addRecord();
@@ -124,34 +101,19 @@ public class AddRecordPanel extends JPanel {
 
     public void refreshUserInfo() {
         String sessionId = mainFrame.getSessionId();
-        String userName = getUserNameFromSession(sessionId);
-        userInfoLabel.setText("ログイン中: " + userName);
+        String userId = getUserIdFromSession(sessionId);
+        userInfoLabel.setText("ログイン中: " + (userId == null ? "未ログイン" : userId));
     }
 
-    private String getUserNameFromSession(String sessionId) {
-        if (sessionId == null) return "未ログイン";
-
+    private String getUserIdFromSession(String sessionId) {
+        if (sessionId == null) return null;
         SessionDAO sessionDAO = new SessionDAO();
-        String userId = sessionDAO.getUserIdBySession(sessionId);
-        if (userId == null) return "未ログイン";
-
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT userName FROM User WHERE userId = ?")) {
-            stmt.setString(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString("userName");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "未ログイン";
+        return sessionDAO.getUserIdBySession(sessionId);
     }
 
     private void loadCategoriesByType(String type) {
         categoryCombo.removeAllItems();
         categoryMap.clear();
-
         Map<String, Integer> map = categoryDAO.getCategoriesByType(type);
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             categoryCombo.addItem(entry.getKey());
@@ -177,15 +139,11 @@ public class AddRecordPanel extends JPanel {
         try {
             date = LocalDate.parse(dateStr);
             LocalDate today = LocalDate.now();
-            LocalDate minDate = today.minusDays(30);
-            LocalDate maxDate = today.plusDays(30);
-            if (date.isBefore(minDate) || date.isAfter(maxDate)) {
-                JOptionPane.showMessageDialog(this, "日付は過去30日～未来30日の範囲で入力してください。\n(許容範囲: " + minDate + " ～ " + maxDate + ")", "日付エラー", JOptionPane.WARNING_MESSAGE);
-                return;
+            if (date.isBefore(today.minusDays(30)) || date.isAfter(today.plusDays(30))) {
+                throw new IllegalArgumentException("日付は過去30日～未来30日の範囲で入力してください。");
             }
         } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "日付の形式が不正です。yyyy-MM-dd形式で入力してください。", "エラー", JOptionPane.ERROR_MESSAGE);
-            return;
+            throw new IllegalArgumentException("日付の形式が不正です。yyyy-MM-dd形式で入力してください。");
         }
 
         int amount;
@@ -197,7 +155,6 @@ public class AddRecordPanel extends JPanel {
         }
 
         boolean success = recordDAO.addRecord(sessionId, Date.valueOf(date), categoryId, type, amount, memo);
-
         if (success) {
             JOptionPane.showMessageDialog(this, "登録成功！");
             clearFields();
@@ -208,8 +165,8 @@ public class AddRecordPanel extends JPanel {
 
     private void clearFields() {
         dateField.setText(LocalDate.now().toString());
-        if (categoryCombo.getItemCount() > 0) categoryCombo.setSelectedIndex(0);
         typeCombo.setSelectedIndex(0);
+        if (categoryCombo.getItemCount() > 0) categoryCombo.setSelectedIndex(0);
         amountField.setText("");
         memoField.setText("");
     }

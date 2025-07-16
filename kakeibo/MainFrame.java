@@ -87,7 +87,13 @@ public class MainFrame extends JFrame {
         if (name.equals("home")) {
             HomePanel homePanel = (HomePanel) getPanel("home");
             if (homePanel != null) {
+                // currentUserId をそのまま表示する
                 homePanel.setUserInfo(currentUserId, "", sessionId);
+            }
+        } else if (name.equals("addRecord")) {
+            AddRecordPanel addPanel = (AddRecordPanel) getPanel("addRecord");
+            if (addPanel != null) {
+                addPanel.refreshUserInfo();
             }
         }
 
