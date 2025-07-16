@@ -39,7 +39,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
         add(new JLabel("新規登録"));
         add(new JLabel("ユーザー名（英数字8〜20文字）"));
         add(userIDField);
-        add(new JLabel("パスワード設定（8文字以上、大文字・小文字・数字を含む）"));
+        add(new JLabel("パスワード設定（8文字以上、大文字・小文字・数字を含む・特殊文字：(!#@_）):"));
         add(pass);
         add(new JLabel("もう一度入力"));
         add(pass2);

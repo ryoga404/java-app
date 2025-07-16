@@ -5,18 +5,18 @@ import java.util.Set;
 public class CheckPassword {
 
     private static final Set<String> forbiddenHashes = Set.of(
-            "4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2", 
-            "fc6f856465a388f8ae3530e3bf7564792f8e4816bdc54963f718720782586109",
-            "4194d1706ed1f408d5e02d672777019f4d5385c766a8c6ca8acba3167d36a7b9", 
-            "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
-        	"6b3a55e0261b0304143f805a24924d0c1c44524821305f31d9277843b8a10f4e"
+        "4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2", 
+        "fc6f856465a388f8ae3530e3bf7564792f8e4816bdc54963f718720782586109",
+        "4194d1706ed1f408d5e02d672777019f4d5385c766a8c6ca8acba3167d36a7b9", 
+        "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+        "6b3a55e0261b0304143f805a24924d0c1c44524821305f31d9277843b8a10f4e"
     );
 
-    // 追加：特殊文字セット（例）
-    private static final Set<Character> specialChars = Set.of(
-        '!','#','_','@'
-    );
- 
+    private static final Set<Character> specialChars = Set.of('!', '#', '_', '@');
+
+    // 禁止文字（例: ' " ” ）
+    private static final Set<Character> forbiddenChars = Set.of('\'', '\"', '”');
+
     public static String validate(String password, String userName) {
         if (password == null || password.isEmpty()) {
             return "パスワードを入力してください。";
@@ -24,6 +24,10 @@ public class CheckPassword {
 
         if (password.length() < 8 || password.length() > 20) {
             return "パスワードは8～20文字で入力してください。";
+        }
+
+        if (containsForbiddenChar(password)) {
+            return "パスワードに使用できない文字が含まれています（例: ' \" ”）。";
         }
 
         if (password.equals(userName)) {
@@ -38,9 +42,9 @@ public class CheckPassword {
         if (forbiddenHashes.contains(hash)) {
             return "そのパスワードは使用できません。別のものを選んでください。";
         }
-        
+
         if (!containsUpperLowerDigit(password)) {
-        	return "パスワードは英大文字・小文字・数字を１つ以上含んでください";
+            return "パスワードは英大文字・小文字・数字を１つ以上含んでください。";
         }
 
         if (!containsSpecialChar(password)) {
@@ -54,7 +58,7 @@ public class CheckPassword {
     private static boolean hasThreeOrMoreConsecutiveSameChars(String s) {
         int count = 1;
         for (int i = 1; i < s.length(); i++) {
-            if (s.charAt(i) == s.charAt(i-1)) {
+            if (s.charAt(i) == s.charAt(i - 1)) {
                 count++;
                 if (count >= 3) return true;
             } else {
@@ -63,7 +67,8 @@ public class CheckPassword {
         }
         return false;
     }
-    
+
+    // 英大文字・小文字・数字のすべてを含むか
     public static boolean containsUpperLowerDigit(String password) {
         boolean hasUpper = false;
         boolean hasLower = false;
@@ -82,7 +87,7 @@ public class CheckPassword {
         return false;
     }
 
-    // 追加：特殊文字含有チェック
+    // 特殊文字を含むかチェック
     private static boolean containsSpecialChar(String password) {
         for (char c : password.toCharArray()) {
             if (specialChars.contains(c)) {
@@ -92,7 +97,17 @@ public class CheckPassword {
         return false;
     }
 
-    // SHA256ハッシュ計算
+    // 禁止文字を含むかチェック
+    private static boolean containsForbiddenChar(String password) {
+        for (char c : password.toCharArray()) {
+            if (forbiddenChars.contains(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // SHA-256ハッシュ計算
     private static String sha256(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
