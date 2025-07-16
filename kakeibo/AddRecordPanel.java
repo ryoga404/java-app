@@ -1,10 +1,15 @@
 import java.awt.*;
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.*;
+import java.sql.SQLException;
+
 
 public class AddRecordPanel extends JPanel {
 
@@ -17,16 +22,19 @@ public class AddRecordPanel extends JPanel {
 
     private JLabel userInfoLabel;
     private Map<String, Integer> categoryMap = new LinkedHashMap<>();
+
     private RecordDAO recordDAO = new RecordDAO();
+    private CategoryDAO categoryDAO = new CategoryDAO();
 
     public AddRecordPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
 
-        // --- ヘッダー（ログインユーザー名 + ログアウト） ---
+        // ヘッダー
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         userInfoLabel = new JLabel();
         JButton logoutButton = new JButton("ログアウト");
+        JButton backToHome = new JButton("ホームへ");
 
         logoutButton.addActionListener(e -> {
             if (mainFrame != null) {
@@ -34,11 +42,18 @@ public class AddRecordPanel extends JPanel {
             }
         });
 
+        backToHome.addActionListener(e -> {
+            if (mainFrame != null) {
+                mainFrame.showPanel("home");
+            }
+        });
+
         headerPanel.add(userInfoLabel);
         headerPanel.add(logoutButton);
+        headerPanel.add(backToHome);
         add(headerPanel, BorderLayout.NORTH);
 
-        // --- 入力フォーム部分 ---
+        // 入力フォーム
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -52,19 +67,19 @@ public class AddRecordPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(dateField, gbc);
 
+        // タイプ（収入 / 支出）
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("タイプ:"), gbc);
+        typeCombo = new JComboBox<>(new String[]{"収入", "支出"});
+        gbc.gridx = 1;
+        formPanel.add(typeCombo, gbc);
+
         // カテゴリ
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(new JLabel("カテゴリ:"), gbc);
         categoryCombo = new JComboBox<>();
         gbc.gridx = 1;
         formPanel.add(categoryCombo, gbc);
-
-        // タイプ
-        gbc.gridx = 0; gbc.gridy++;
-        formPanel.add(new JLabel("タイプ:"), gbc);
-        typeCombo = new JComboBox<>(new String[]{"In", "Out"});
-        gbc.gridx = 1;
-        formPanel.add(typeCombo, gbc);
 
         // 金額
         gbc.gridx = 0; gbc.gridy++;
@@ -86,6 +101,18 @@ public class AddRecordPanel extends JPanel {
         JButton addButton = new JButton("登録");
         formPanel.add(addButton, gbc);
 
+        add(formPanel, BorderLayout.CENTER);
+
+        // タイプ選択変更時にカテゴリ更新
+        typeCombo.addActionListener(e -> {
+            String selectedType = (String) typeCombo.getSelectedItem();
+            loadCategoriesByType(selectedType);
+        });
+
+        // 初期カテゴリロード
+        loadCategoriesByType((String) typeCombo.getSelectedItem());
+
+        // 登録処理
         addButton.addActionListener(e -> {
             try {
                 addRecord();
@@ -93,9 +120,6 @@ public class AddRecordPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "入力エラー: " + ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
             }
         });
-
-        add(formPanel, BorderLayout.CENTER);
-        loadCategoriesFromDB();
     }
 
     public void refreshUserInfo() {
@@ -124,24 +148,14 @@ public class AddRecordPanel extends JPanel {
         return "未ログイン";
     }
 
-    private void loadCategoriesFromDB() {
+    private void loadCategoriesByType(String type) {
         categoryCombo.removeAllItems();
         categoryMap.clear();
 
-        String sql = "SELECT categoryId, categoryName FROM Category ORDER BY categoryName";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                int id = rs.getInt("categoryId");
-                String name = rs.getString("categoryName");
-                categoryCombo.addItem(name);
-                categoryMap.put(name, id);
-            }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "カテゴリの読み込みに失敗しました。\n" + e.getMessage(), "DBエラー", JOptionPane.ERROR_MESSAGE);
+        Map<String, Integer> map = categoryDAO.getCategoriesByType(type);
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            categoryCombo.addItem(entry.getKey());
+            categoryMap.put(entry.getKey(), entry.getValue());
         }
     }
 
@@ -152,12 +166,26 @@ public class AddRecordPanel extends JPanel {
         String amountStr = amountField.getText().trim();
         String memo = memoField.getText().trim();
 
-        // 入力チェック
+        if (categoryName == null || !categoryMap.containsKey(categoryName)) {
+            throw new IllegalArgumentException("カテゴリが選択されていないか無効です。");
+        }
+
+        int categoryId = categoryMap.get(categoryName);
+        String sessionId = mainFrame.getSessionId();
+
         LocalDate date;
         try {
             date = LocalDate.parse(dateStr);
+            LocalDate today = LocalDate.now();
+            LocalDate minDate = today.minusDays(30);
+            LocalDate maxDate = today.plusDays(30);
+            if (date.isBefore(minDate) || date.isAfter(maxDate)) {
+                JOptionPane.showMessageDialog(this, "日付は過去30日～未来30日の範囲で入力してください。\n(許容範囲: " + minDate + " ～ " + maxDate + ")", "日付エラー", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
         } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException("日付の形式が不正です。yyyy-MM-dd形式で入力してください。");
+            JOptionPane.showMessageDialog(this, "日付の形式が不正です。yyyy-MM-dd形式で入力してください。", "エラー", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
         int amount;
@@ -167,13 +195,6 @@ public class AddRecordPanel extends JPanel {
         } catch (NumberFormatException ex) {
             throw new IllegalArgumentException("金額は正の整数で入力してください。");
         }
-
-        if (categoryName == null || !categoryMap.containsKey(categoryName)) {
-            throw new IllegalArgumentException("カテゴリが選択されていないか無効です。");
-        }
-
-        int categoryId = categoryMap.get(categoryName);
-        String sessionId = mainFrame.getSessionId();
 
         boolean success = recordDAO.addRecord(sessionId, Date.valueOf(date), categoryId, type, amount, memo);
 

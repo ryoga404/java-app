@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class DBUtil {
     private static final String URL = "jdbc:mysql://localhost:3306/kakeibo?useSSL=false"; //接続のためのURL
-    private static final String USER = "root"; //ユーザ名
-    private static final String PASSWORD = ""; //パスワードなし
+    private static final String USER = "ryoga404"; //ユーザ名
+    private static final String PASSWORD = "RYOGA2290"; //パスワードなし
 
     static {
         try {
