@@ -55,11 +55,3 @@ public class PassToHash {
 
 }
 
-/*
- * 呼び出し方
- * PassToHash.HashResult result = PassToHash.createHashPassword(password);
- *
- *(以下をDB関連のユーザテーブル追加メソッド・ソルト追加メソッドへ渡す)
- * String salt = result.salt;
- * String hashedPassword = result.hashedPassword;
- */
