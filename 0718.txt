@@ -1,0 +1,61 @@
+0716
+
+GitBash
+ cd /C/Users/mid
+ source .bashrc (パスワードは「password」）
+ cd Desktop/java-app
+ git remote set-url origin git@github.com:ryoga404/java-app.git
+ git pull origin main
+
+(Eclipseにてパッケージエクスプロラー右クリック＞インポート＞Desktop/java-app/kakeiboをインポート）
+
+以下の３ファイルを作成（割当は任せます）
+［GroupDAO］(UserDAO等とDB内のテーブル構造を参考に）
+　　・主にGroupCreatePanelから呼び出される
+　　・createGroupメソッドでは
+　　グループを作成（IDはインクリメントなので
+　　Values(null, groupname)みたいになる。）
+　　・deleteGroup
+　　・joinGroup(引数：userId,GroupName)
+　　・グループから抜けるメソッド
+
+　［GroupCreatePanel］
+　・グループ名を入力
+　・作成ボタン（GroupDAOのcreateGroupメソッド）
+　・作成完了→作成完了ダイアログ
+　・作成失敗→作成失敗ダイアログ
+
+　［JoinGroupPanel］
+　・グループ名入力
+　・参加ボタン（GroupDAOのjoinGroupメソッド）
+
+　メッセージはGroupCreatePanelみたいな感じに
+　
+　全てのパネルにHomePanelへ戻るボタンとログアウトボタンを設置
+　
+　（ログアウト処理は以下を参考に）
+　      logoutButton.addActionListener(e -> {
+            if (sessionId != null) {
+                SessionDAO sessionDAO = new SessionDAO();
+                boolean deleted = sessionDAO.deleteSession(sessionId);
+                if (deleted) {
+                    System.out.println("セッション削除成功：" + sessionId);
+                } else {
+                    System.err.println("セッション削除失敗：" + sessionId);
+                }
+            }
+
+            setUserInfo(null, null, null);  // ログアウト状態に戻す
+            if (mainFrame != null) {
+                mainFrame.setSessionId(null);
+                mainFrame.setCurrentUserId(null);
+                mainFrame.showPanel("top");
+            }
+        });
+        
+
+　レイアウトは見やすければ自由
+　
+　
+　ーーーーーーーーーー
+　作業前・Git push前はgit pull origin mainでローカル環境にリモート（Git上）の他の人の変更を反映させる！！！！
