@@ -24,3 +24,5 @@
 
 /CheckUserName.class
 /CheckPassword.class
+/PuzzleCaptchaDialog.class
+/PuzzleCaptchaPanel.class
