@@ -67,11 +67,13 @@ public class MainFrame extends JFrame {
         SessionDAO sessionDAO = new SessionDAO();
         boolean validSession = (sessionId != null) && sessionDAO.isSessionValid(sessionId);
 
+        // ログイン済みならlogin/registerに行こうとしたらhomeへ
         if (name.equals("login") || name.equals("register")) {
             if (validSession) {
                 name = "home";
             }
         } else if (!name.equals("top")) {
+            // ログインが必要な画面でセッション無効ならトップに戻す
             if (!validSession) {
                 JOptionPane.showMessageDialog(this, "セッションが無効です。再ログインしてください。");
                 sessionId = null;
@@ -80,14 +82,17 @@ public class MainFrame extends JFrame {
             }
         }
 
+        // 動的に追加するパネル
         if (name.equals("addRecord") && !addedPanels.contains(name)) {
             addPanel(name, new AddRecordPanel(this));
+        } else if (name.equals("editRecord") && !addedPanels.contains(name)) {
+            addPanel(name, new EditRecordPanel(this));
         }
 
+        // homeパネルにユーザー情報をセット
         if (name.equals("home")) {
             HomePanel homePanel = (HomePanel) getPanel("home");
             if (homePanel != null) {
-                // currentUserId をそのまま表示する
                 homePanel.setUserInfo(currentUserId, "", sessionId);
             }
         } else if (name.equals("addRecord")) {
@@ -95,6 +100,15 @@ public class MainFrame extends JFrame {
             if (addPanel != null) {
                 addPanel.refreshUserInfo();
             }
+        } else if (name.equals("editRecord")) {
+            EditRecordPanel editPanel = (EditRecordPanel) getPanel("editRecord");
+            if (editPanel == null) {
+                editPanel = new EditRecordPanel(this);
+                addPanel("editRecord", editPanel);
+            }
+            editPanel.loadData();
+            editPanel.updateTableData();
+            editPanel.refreshUserInfo();  // ← ここを追加！
         }
 
         cardLayout.show(cardPanel, name);

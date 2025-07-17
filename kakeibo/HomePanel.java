@@ -13,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 
 public class HomePanel extends JPanel {
 
@@ -27,7 +26,7 @@ public class HomePanel extends JPanel {
 
     private JLabel usernameLabel;
     private JLabel groupLabel;
-    private JButton logoutButton;
+    private JButton logoutButton;  // ← 追加
 
     private String sessionId; // セッションIDを保持
 
@@ -41,35 +40,21 @@ public class HomePanel extends JPanel {
 
         usernameLabel = new JLabel("ログインしていません");
         groupLabel = new JLabel("");
-        logoutButton = new JButton("ログアウト");
+        logoutButton = new JButton("ログアウト");  // ← 追加
 
         usernameLabel.setForeground(Color.WHITE);
         groupLabel.setForeground(Color.WHITE);
-        logoutButton.setFocusPainted(false);
-        logoutButton.setEnabled(false); // 初期は無効
+        logoutButton.setFocusable(false);
 
+        // ログアウトボタンの動作設定
+        logoutButton.addActionListener(e -> {
+            mainFrame.logout();
+        });
+
+        // ヘッダーにコンポーネントを追加
         headerPanel.add(usernameLabel);
         headerPanel.add(groupLabel);
-        headerPanel.add(logoutButton);
-
-        logoutButton.addActionListener(e -> {
-            if (sessionId != null) {
-                SessionDAO sessionDAO = new SessionDAO();
-                boolean deleted = sessionDAO.deleteSession(sessionId);
-                if (deleted) {
-                    System.out.println("セッション削除成功：" + sessionId);
-                } else {
-                    System.err.println("セッション削除失敗：" + sessionId);
-                }
-            }
-
-            setUserInfo(null, null, null);
-            if (mainFrame != null) {
-                mainFrame.setSessionId(null);
-                mainFrame.setCurrentUserId(null);
-                mainFrame.showPanel("top");
-            }
-        });
+        headerPanel.add(logoutButton);  // ← 追加
 
         // --- 左メニュー ---
         JPanel menuPanel = new JPanel();
@@ -82,7 +67,8 @@ public class HomePanel extends JPanel {
             {"📋データ登録", "addRecord"},
             {"🗓データ抽出（カレンダー）", "calendar"},
             {"📁インポート / エクスポート", "importexport"},
-            {"👥グループ管理", "group"}
+            {"👥グループ管理", "group"},
+            {"✏️編集", "editRecord"}
         };
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 12);
@@ -101,6 +87,8 @@ public class HomePanel extends JPanel {
                 setActiveMenu(name);
                 if (name.equals("addRecord")) {
                     mainFrame.showPanel("addRecord");
+                } else if (name.equals("editRecord")) {
+                    animateSwitchView(name);
                 } else {
                     animateSwitchView(name);
                 }
@@ -111,7 +99,12 @@ public class HomePanel extends JPanel {
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
             if (!name.equals("addRecord")) {
-                JPanel page = createPage(label + "画面です。");
+                JPanel page;
+                if (name.equals("editRecord")) {
+                    page = new EditRecordPanel(mainFrame);
+                } else {
+                    page = createPage(label + "画面です。");
+                }
                 page.setVisible(false);
                 views.put(name, page);
             }
@@ -142,11 +135,9 @@ public class HomePanel extends JPanel {
         if (userId == null || userId.isEmpty()) {
             usernameLabel.setText("ログインしていません");
             groupLabel.setText("");
-            logoutButton.setEnabled(false);
         } else {
             usernameLabel.setText("ユーザーID：" + userId);
             groupLabel.setText("グループ：" + (group == null ? "" : group));
-            logoutButton.setEnabled(true);
         }
     }
 

@@ -1,10 +1,27 @@
-import java.awt.*;
-import java.sql.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.*;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class AddRecordPanel extends JPanel {
 
@@ -16,6 +33,11 @@ public class AddRecordPanel extends JPanel {
 
     private RecordDAO recordDAO = new RecordDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
+
+    // 左メニュー用コンポーネント
+    private HashMap<String, JButton> menuButtons = new HashMap<>();
+    private Color selectedColor = new Color(200, 220, 240);
+    private Color normalColor = Color.WHITE;
 
     public AddRecordPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -29,16 +51,53 @@ public class AddRecordPanel extends JPanel {
         userInfoLabel.setForeground(Color.WHITE);
         userInfoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JButton backToHome = new JButton("ホームへ");
-        backToHome.setFocusPainted(false);
-        backToHome.setBackground(Color.WHITE);
-        backToHome.setForeground(Color.BLACK);
-        backToHome.setFont(new Font("SansSerif", Font.BOLD, 12));
-        backToHome.addActionListener(e -> mainFrame.showPanel("home"));
+        JButton logoutButton = new JButton("ログアウト");
+        logoutButton.setFocusable(false);
+        logoutButton.addActionListener(e -> mainFrame.logout());
 
         headerPanel.add(userInfoLabel);
-        headerPanel.add(backToHome);
+        headerPanel.add(logoutButton);
+
         add(headerPanel, BorderLayout.NORTH);
+
+        // --- 左メニュー ---
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
+        menuPanel.setBackground(new Color(245, 245, 245));
+        menuPanel.setPreferredSize(new Dimension(220, 600));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
+
+        String[][] menuItems = {
+            {"📋データ登録", "addRecord"},
+            {"🗓データ抽出（カレンダー）", "calendar"},
+            {"📁インポート / エクスポート", "importexport"},
+            {"👥グループ管理", "group"},
+            {"✏️編集", "editRecord"}
+        };
+
+        Font btnFont = new Font("SansSerif", Font.BOLD, 12);
+        for (String[] item : menuItems) {
+            String label = item[0];
+            String name = item[1];
+
+            JButton btn = new JButton(label);
+            btn.setFont(btnFont);
+            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            btn.setBackground(name.equals("addRecord") ? selectedColor : normalColor);
+            btn.setFocusPainted(false);
+
+            btn.addActionListener(e -> {
+                setActiveMenu(name);
+                mainFrame.showPanel(name);
+            });
+
+            menuButtons.put(name, btn);
+            menuPanel.add(btn);
+            menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        }
+
+        add(menuPanel, BorderLayout.WEST);
 
         // --- 入力フォーム ---
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -84,6 +143,7 @@ public class AddRecordPanel extends JPanel {
 
         add(formPanel, BorderLayout.CENTER);
 
+        // イベント登録
         typeCombo.addActionListener(e -> {
             String selectedType = (String) typeCombo.getSelectedItem();
             loadCategoriesByType(selectedType);
@@ -97,6 +157,13 @@ public class AddRecordPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "入力エラー: " + ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
             }
         });
+    }
+
+    private void setActiveMenu(String name) {
+        for (String key : menuButtons.keySet()) {
+            JButton btn = menuButtons.get(key);
+            btn.setBackground(key.equals(name) ? selectedColor : normalColor);
+        }
     }
 
     public void refreshUserInfo() {
@@ -154,7 +221,7 @@ public class AddRecordPanel extends JPanel {
             throw new IllegalArgumentException("金額は正の整数で入力してください。");
         }
 
-        boolean success = recordDAO.addRecord(sessionId, Date.valueOf(date), categoryId, type, amount, memo);
+        boolean success = recordDAO.addRecord(sessionId, java.sql.Date.valueOf(date), categoryId, type, amount, memo);
         if (success) {
             JOptionPane.showMessageDialog(this, "登録成功！");
             clearFields();
