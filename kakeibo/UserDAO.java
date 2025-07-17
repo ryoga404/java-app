@@ -28,12 +28,12 @@ public class UserDAO {
                 saltStmt.executeUpdate();
             }
 
-            System.out.println("登録完了しました！");
+            //System.out.println("登録完了しました！");
             return true;
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("登録できませんでした！");
+            //System.out.println("登録できませんでした！");
             return false;
         }
     }

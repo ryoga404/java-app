@@ -3,13 +3,11 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 public class RegisterPanel extends JPanel implements ActionListener {
     private JPasswordField pass;
@@ -81,6 +79,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
         }
     }
 
+    /*
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("新規登録画面");
@@ -90,5 +89,5 @@ public class RegisterPanel extends JPanel implements ActionListener {
             frame.setContentPane(panel);
             frame.setVisible(true);
         });
-    }
+    }*/
 }
