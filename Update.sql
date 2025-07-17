@@ -34,7 +34,8 @@ CREATE TABLE session (
 -- カテゴリテーブル
 CREATE TABLE category (
     CategoryId INT AUTO_INCREMENT PRIMARY KEY,
-    CategoryName VARCHAR(100) NOT NULL
+    CategoryName VARCHAR(100) NOT NULL,
+    CategoryType enum('In', 'Out') NOT NULL
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- レコードテーブル
