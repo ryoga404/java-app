@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class GroupDAO {
@@ -35,15 +36,93 @@ public class GroupDAO {
 	
 	
 	//グループ削除
-	public void deleteGroup(String GroupName) {
-		
+	public boolean deleteGroup(String GroupName) {
+		try (Connection conn = DBUtil.getConnection()) {
+
+            // grouptable テーブルに登録
+            String userSql = "DELETE FROM grouptable WHERE GroupName = ?";
+            try (PreparedStatement userStmt = conn.prepareStatement(userSql)) {
+                userStmt.setString(1, GroupName);
+                userStmt.executeUpdate();
+            }
+
+            //System.out.println("グループを削除しました！");
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            //System.out.println("グループを削除できませんでした！");
+            return false;
+        }
 	}
 	
 	//JoinGroupPanelクラスからグループ名を受け取ってグループ参加させる
-	public void joinGroup(String userId,String GroupName) {
-		
+	public boolean joinGroup(String userId,String GroupName) {
+		try (Connection conn = DBUtil.getConnection()) {
+
+			String GroupId = getGroupId(GroupName);//GroupNameからGroupIdを取得
+			
+            // grouptable テーブルに登録
+            String userSql = "INSERT INTO groupmember (GroupId, UserId) VALUES (?, ?)";
+            try (PreparedStatement userStmt = conn.prepareStatement(userSql)) {
+                userStmt.setString(1, GroupId);
+                userStmt.setString(2, userId);
+                userStmt.executeUpdate();
+            }
+
+            //System.out.println("グループに参加しました！");
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            //System.out.println("グループに参加できませんでした！");
+            return false;
+        }
 	}
 	
 	//グループから抜けるメソッド
-	//public void　Group(String GroupName){
+	public boolean Group(String userId, String GroupName){
+		try (Connection conn = DBUtil.getConnection()) {
+
+			String GroupId = getGroupId(GroupName);//GroupNameからGroupIdを取得
+			
+            // grouptable テーブルに登録
+            String userSql = "DELETE FROM groupmember WHERE GroupId = ? AND UserId = ? ";
+            try (PreparedStatement userStmt = conn.prepareStatement(userSql)) {
+                userStmt.setString(1, GroupId);
+                userStmt.setString(2, userId);
+                userStmt.executeUpdate();
+            }
+
+            //System.out.println("グループから抜けましました！");
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            //System.out.println("グループから抜けれませんでした！");
+            return false;
+        }
+	}
+	
+	
+	//GroupNameからGroupIdを取得
+	public String getGroupId(String GroupName) {
+		try (Connection conn = DBUtil.getConnection()) {
+
+            // GroupIdを取得
+            String saltSql = "SELECT GroupId FROM grouptable WHERE GroupName = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(saltSql)) {
+                stmt.setString(1, GroupName);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                	return rs.getString("GroupId");
+                } else {
+                    return null; // ユーザーが存在しない
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+	}
 }
