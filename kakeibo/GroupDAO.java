@@ -81,7 +81,7 @@ public class GroupDAO {
 	}
 	
 	//グループから抜けるメソッド
-	public boolean Group(String userId, String GroupName){
+	public boolean leaveGroup(String userId, String GroupName){
 		try (Connection conn = DBUtil.getConnection()) {
 
 			String GroupId = getGroupId(GroupName);//GroupNameからGroupIdを取得
