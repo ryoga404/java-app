@@ -26,6 +26,7 @@
 /CheckPassword.class
 /PuzzleCaptchaDialog.class
 /PuzzleCaptchaPanel.class
+<<<<<<< HEAD
 /EditRecordPanel$1.class
 /EditRecordPanel$RecordData.class
 /EditRecordPanel$RecordTableModel.class
@@ -35,3 +36,15 @@
 /JoinGroupPanel.class
 /TopPanel$2.class
 /TopPanel$3.class
+/EditRecordPanel$CategoryCellEditor.class
+/EditRecordPanel$RecordTableModel.class
+/GroupCreatePanel$1.class
+/GroupCreatePanel$2.class
+/GroupCreatePanel.class
+/JoinGroupPanel.class
+/TopPanel$1.class
+/TopPanel$2.class
+/TopPanel$3.class
+/GroupCreatePanel$BudgetRecord.class
+/GroupCreatePanel$Utils.class
+
