@@ -94,7 +94,7 @@ public class JoinGroupPanel extends JPanel {
 
         boolean success = false;
         try {
-            success = groupDAO.joinGroup(userId, groupName);
+            success = GroupDAO.joinGroup(userId, groupName);
         } catch (Exception ex) {
             showError("参加処理中にエラーが発生しました。");
             ex.printStackTrace();
