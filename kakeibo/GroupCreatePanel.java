@@ -1,4 +1,4 @@
-package kakeibo;
+//package kakeibo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,7 +16,6 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -25,11 +24,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-public class GroupCreatePanel extends JFrame {
+public class GroupCreatePanel extends JPanel {
 
     private Map<String, java.util.List<BudgetRecord>> groupData = new HashMap<>();
     private DefaultListModel<String> groupListModel = new DefaultListModel<>();
@@ -46,26 +44,17 @@ public class GroupCreatePanel extends JFrame {
 
     private String currentGroup = null;
 
-    // 仮のログインID
     private String loginId = "User123";
 
-    // カテゴリーごとの項目リストマップ
     private Map<String, java.util.List<String>> categoryItems = new HashMap<>();
 
     public GroupCreatePanel() {
-        setTitle("✨ 家計簿グループ共有アプリ (Premium Edition) ✨");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(960, 640);
-        setLocationRelativeTo(null);
-
-        // カスタムフォントとテーマカラー
         Font titleFont = new Font("Dialog", Font.BOLD, 22);
         Font normalFont = new Font("Dialog", Font.PLAIN, 14);
-        Color primaryColor = new Color(40, 116, 166);   // ネイビー系
-        Color secondaryColor = new Color(238, 238, 238); // 薄グレー
-        Color accentColor = new Color(255, 183, 77);     // オレンジ系
+        Color primaryColor = new Color(40, 116, 166);
+        Color secondaryColor = new Color(238, 238, 238);
+        Color accentColor = new Color(255, 183, 77);
 
-        // カテゴリーごとの項目を設定
         categoryItems.put("食費", java.util.Arrays.asList("スーパー", "レストラン", "コンビニ"));
         categoryItems.put("娯楽", java.util.Arrays.asList("映画", "ゲーム", "カラオケ", "雑貨"));
         categoryItems.put("交通", java.util.Arrays.asList("電車", "バス", "タクシー"));
@@ -73,26 +62,25 @@ public class GroupCreatePanel extends JFrame {
         categoryItems.put("医療", java.util.Arrays.asList("医療"));
         categoryItems.put("その他", java.util.Arrays.asList("その他"));
 
-        // 全体パネル
-        JPanel mainPanel = new JPanel(new BorderLayout(10,10));
-        mainPanel.setBorder(new EmptyBorder(15,15,15,15));
-        mainPanel.setBackground(secondaryColor);
-        setContentPane(mainPanel);
+        // JPanel自体のレイアウトとスタイル
+        setLayout(new BorderLayout(10, 10));
+        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setBackground(secondaryColor);
 
-        // --- 上部パネルにログインID表示 ---
+        // 上部ログインID表示
         JLabel loginLabel = new JLabel("ログインID: " + loginId);
         loginLabel.setFont(new Font("Dialog", Font.BOLD, 16));
         loginLabel.setForeground(primaryColor);
-        loginLabel.setBorder(new EmptyBorder(0,0,10,0));
-        mainPanel.add(loginLabel, BorderLayout.NORTH);
+        loginLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
+        add(loginLabel, BorderLayout.NORTH);
 
-        // 左ペイン (グループ一覧 + 作成 + 参加)
+        // 左パネル：グループ一覧、作成・参加ボタン
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setPreferredSize(new Dimension(230, 0));
         leftPanel.setBackground(Color.WHITE);
         leftPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0,0,0,2, primaryColor),
-                new EmptyBorder(10,10,10,10)));
+                BorderFactory.createMatteBorder(0, 0, 0, 2, primaryColor),
+                new EmptyBorder(10, 10, 10, 10)));
 
         JLabel groupTitle = new JLabel("グループ一覧");
         groupTitle.setFont(titleFont);
@@ -112,6 +100,10 @@ public class GroupCreatePanel extends JFrame {
                 if (selected != null) {
                     currentGroup = selected;
                     loadGroupRecords(selected);
+                } else {
+                    currentGroup = null;
+                    tableModel.setRowCount(0);
+                    setInputEnabled(false);
                 }
             }
         });
@@ -120,7 +112,6 @@ public class GroupCreatePanel extends JFrame {
         groupScroll.setBorder(BorderFactory.createEmptyBorder());
         leftPanel.add(groupScroll, BorderLayout.CENTER);
 
-        // 作成＆参加ボタンパネル
         JPanel btnPanel = new JPanel(new GridBagLayout());
         btnPanel.setBackground(Color.WHITE);
 
@@ -140,7 +131,7 @@ public class GroupCreatePanel extends JFrame {
 
         joinGroupBtn = new JButton("＋ グループに参加");
         joinGroupBtn.setFont(normalFont);
-        joinGroupBtn.setBackground(new Color(100, 181, 246));  // 水色系
+        joinGroupBtn.setBackground(new Color(100, 181, 246));
         joinGroupBtn.setForeground(Color.WHITE);
         joinGroupBtn.setFocusPainted(false);
         joinGroupBtn.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
@@ -155,10 +146,10 @@ public class GroupCreatePanel extends JFrame {
 
         leftPanel.add(btnPanel, BorderLayout.SOUTH);
 
-        mainPanel.add(leftPanel, BorderLayout.WEST);
+        add(leftPanel, BorderLayout.WEST);
 
-        // 中央ペイン (家計簿記録 + 入力フォーム)
-        JPanel centerPanel = new JPanel(new BorderLayout(0,10));
+        // 中央パネル：家計簿記録テーブル + 入力フォーム
+        JPanel centerPanel = new JPanel(new BorderLayout(0, 10));
         centerPanel.setBackground(secondaryColor);
 
         JLabel centerTitle = new JLabel("家計簿記録");
@@ -167,10 +158,8 @@ public class GroupCreatePanel extends JFrame {
         centerTitle.setBorder(new EmptyBorder(0, 0, 10, 0));
         centerPanel.add(centerTitle, BorderLayout.NORTH);
 
-        // テーブル設定
         String[] columns = {"ユーザー", "カテゴリー", "項目", "金額", "日付", "メモ"};
         tableModel = new DefaultTableModel(columns, 0) {
-            // 編集不可に
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -188,57 +177,66 @@ public class GroupCreatePanel extends JFrame {
         tableScroll.setBorder(BorderFactory.createLineBorder(primaryColor, 2));
         centerPanel.add(tableScroll, BorderLayout.CENTER);
 
-        // グループ未選択時のメッセージラベル
         JLabel noGroupLabel = new JLabel("※グループに参加していません。左の「グループに参加」ボタンから参加してください。");
         noGroupLabel.setFont(normalFont);
         noGroupLabel.setForeground(Color.RED);
         noGroupLabel.setHorizontalAlignment(JLabel.CENTER);
-        noGroupLabel.setBorder(new EmptyBorder(12,0,12,0));
+        noGroupLabel.setBorder(new EmptyBorder(12, 0, 12, 0));
         centerPanel.add(noGroupLabel, BorderLayout.SOUTH);
 
-        // 入力フォームパネル
         JPanel inputPanel = new JPanel(new GridBagLayout());
         inputPanel.setBackground(secondaryColor);
         inputPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(primaryColor, 2),
-                new EmptyBorder(12,12,12,12)));
+                new EmptyBorder(12, 12, 12, 12)));
 
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(6,8,6,8);
+        c.insets = new Insets(6, 8, 6, 8);
         c.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel userLabel = new JLabel("ユーザー:");
         userLabel.setFont(normalFont);
         userLabel.setForeground(primaryColor);
-        c.gridx = 0; c.gridy = 0; inputPanel.add(userLabel, c);
+        c.gridx = 0;
+        c.gridy = 0;
+        inputPanel.add(userLabel, c);
 
         userField = new JTextField(8);
-        c.gridx = 1; c.gridy = 0; inputPanel.add(userField, c);
+        userField.setText(loginId);
+        userField.setEnabled(false);
+        c.gridx = 1;
+        c.gridy = 0;
+        inputPanel.add(userField, c);
 
-        // カテゴリーラベルとコンボボックス追加
         JLabel categoryLabel = new JLabel("カテゴリー:");
         categoryLabel.setFont(normalFont);
         categoryLabel.setForeground(primaryColor);
-        c.gridx = 2; c.gridy = 0; inputPanel.add(categoryLabel, c);
+        c.gridx = 2;
+        c.gridy = 0;
+        inputPanel.add(categoryLabel, c);
 
         categoryCombo = new JComboBox<>();
         for (String category : categoryItems.keySet()) {
             categoryCombo.addItem(category);
         }
         categoryCombo.setFont(normalFont);
-        c.gridx = 3; c.gridy = 0; inputPanel.add(categoryCombo, c);
+        c.gridx = 3;
+        c.gridy = 0;
+        inputPanel.add(categoryCombo, c);
 
-        // 項目ラベルとコンボボックス
         JLabel itemLabel = new JLabel("項目:");
         itemLabel.setFont(normalFont);
         itemLabel.setForeground(primaryColor);
-        c.gridx = 0; c.gridy = 1; inputPanel.add(itemLabel, c);
+        c.gridx = 0;
+        c.gridy = 1;
+        inputPanel.add(itemLabel, c);
 
         itemCombo = new JComboBox<>();
         itemCombo.setFont(normalFont);
-        c.gridx = 1; c.gridy = 1; inputPanel.add(itemCombo, c);
+        c.gridx = 1;
+        c.gridy = 1;
+        inputPanel.add(itemCombo, c);
 
-        // カテゴリー選択時に項目コンボを更新
         categoryCombo.addActionListener(e -> {
             String selectedCategory = (String) categoryCombo.getSelectedItem();
             itemCombo.removeAllItems();
@@ -248,24 +246,30 @@ public class GroupCreatePanel extends JFrame {
                 }
             }
         });
-        // 最初のカテゴリーに合わせて項目セット
         categoryCombo.setSelectedIndex(0);
 
         JLabel amountLabel = new JLabel("金額:");
         amountLabel.setFont(normalFont);
         amountLabel.setForeground(primaryColor);
-        c.gridx = 2; c.gridy = 1; inputPanel.add(amountLabel, c);
+        c.gridx = 2;
+        c.gridy = 1;
+        inputPanel.add(amountLabel, c);
 
         amountField = new JTextField(8);
-        c.gridx = 3; c.gridy = 1; inputPanel.add(amountField, c);
+        c.gridx = 3;
+        c.gridy = 1;
+        inputPanel.add(amountField, c);
 
         JLabel memoLabel = new JLabel("メモ:");
         memoLabel.setFont(normalFont);
         memoLabel.setForeground(primaryColor);
-        c.gridx = 0; c.gridy = 2; inputPanel.add(memoLabel, c);
+        c.gridx = 0;
+        c.gridy = 2;
+        inputPanel.add(memoLabel, c);
 
         memoField = new JTextField(12);
-        c.gridx = 1; c.gridy = 2;
+        c.gridx = 1;
+        c.gridy = 2;
         c.gridwidth = 3;
         inputPanel.add(memoField, c);
         c.gridwidth = 1;
@@ -279,26 +283,27 @@ public class GroupCreatePanel extends JFrame {
         addRecordBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         addRecordBtn.addActionListener(e -> addRecord());
 
-        c.gridx = 0; c.gridy = 3; c.gridwidth = 4;
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 4;
         c.anchor = GridBagConstraints.CENTER;
         inputPanel.add(addRecordBtn, c);
         c.gridwidth = 1;
 
         centerPanel.add(inputPanel, BorderLayout.SOUTH);
 
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
 
-        // 初期状態：グループ未所属（グループリスト空）
         updateGroupListDisplay();
 
-        // グループ未所属時は記録追加フォームは無効化
-        setInputEnabled(false);
-
-        setVisible(true);
+        if (!groupListModel.isEmpty()) {
+            groupList.setSelectedIndex(0);
+        } else {
+            setInputEnabled(false);
+        }
     }
 
     private void updateGroupListDisplay() {
-        // 仮: groupDataのキーがグループ名
         groupListModel.clear();
         for (String groupName : groupData.keySet()) {
             groupListModel.addElement(groupName);
@@ -306,23 +311,22 @@ public class GroupCreatePanel extends JFrame {
     }
 
     private void loadGroupRecords(String groupName) {
-        // テーブルをクリア
         tableModel.setRowCount(0);
 
         java.util.List<BudgetRecord> records = groupData.get(groupName);
-        if (records == null) return;
-
-        for (BudgetRecord r : records) {
-            Object[] row = {
-                r.user, r.category, r.item, r.amount, r.date, r.memo
-            };
-            tableModel.addRow(row);
+        if (records != null) {
+            for (BudgetRecord r : records) {
+                Object[] row = {r.user, r.category, r.item, r.amount, r.date, r.memo};
+                tableModel.addRow(row);
+            }
+            setInputEnabled(true);
+        } else {
+            setInputEnabled(false);
         }
-        setInputEnabled(true);
     }
 
     private void setInputEnabled(boolean enabled) {
-        userField.setEnabled(enabled);
+        userField.setEnabled(false);
         categoryCombo.setEnabled(enabled);
         itemCombo.setEnabled(enabled);
         amountField.setEnabled(enabled);
@@ -346,7 +350,7 @@ public class GroupCreatePanel extends JFrame {
             return;
         }
 
-        int amount = 0;
+        int amount;
         try {
             amount = Integer.parseInt(amountStr);
             if (amount < 0) throw new NumberFormatException();
@@ -357,10 +361,14 @@ public class GroupCreatePanel extends JFrame {
 
         BudgetRecord newRecord = new BudgetRecord(user, category, item, amount, Utils.getTodayDate(), memo);
 
-        groupData.get(currentGroup).add(newRecord);
-        tableModel.addRow(new Object[] {user, category, item, amount, newRecord.date, memo});
+        java.util.List<BudgetRecord> records = groupData.get(currentGroup);
+        if (records == null) {
+            records = new ArrayList<>();
+            groupData.put(currentGroup, records);
+        }
+        records.add(newRecord);
+        tableModel.addRow(new Object[]{user, category, item, amount, newRecord.date, memo});
 
-        // 入力クリア
         amountField.setText("");
         memoField.setText("");
     }
@@ -405,7 +413,6 @@ public class GroupCreatePanel extends JFrame {
         JOptionPane.showMessageDialog(this, "グループ「" + groupName + "」に参加しました。");
     }
 
-    // 内部クラスで家計簿記録を表現
     private static class BudgetRecord {
         String user;
         String category;
@@ -424,17 +431,10 @@ public class GroupCreatePanel extends JFrame {
         }
     }
 
-    // ユーティリティクラス（簡易版）
     private static class Utils {
-        // 今日の日付を yyyy/MM/dd 形式で返す
         public static String getTodayDate() {
             java.time.LocalDate today = java.time.LocalDate.now();
             return today.toString().replace("-", "/");
         }
-    }
-
-    // 動作テスト用main
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GroupCreatePanel());
     }
 }

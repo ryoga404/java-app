@@ -1,3 +1,5 @@
+//package kakeibo;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -26,9 +28,9 @@ public class HomePanel extends JPanel {
 
     private JLabel usernameLabel;
     private JLabel groupLabel;
-    private JButton logoutButton;  // ← 追加
+    private JButton logoutButton;
 
-    private String sessionId; // セッションIDを保持
+    private String sessionId;
 
     public HomePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -40,21 +42,19 @@ public class HomePanel extends JPanel {
 
         usernameLabel = new JLabel("ログインしていません");
         groupLabel = new JLabel("");
-        logoutButton = new JButton("ログアウト");  // ← 追加
+        logoutButton = new JButton("ログアウト");
 
         usernameLabel.setForeground(Color.WHITE);
         groupLabel.setForeground(Color.WHITE);
         logoutButton.setFocusable(false);
 
-        // ログアウトボタンの動作設定
         logoutButton.addActionListener(e -> {
             mainFrame.logout();
         });
 
-        // ヘッダーにコンポーネントを追加
         headerPanel.add(usernameLabel);
         headerPanel.add(groupLabel);
-        headerPanel.add(logoutButton);  // ← 追加
+        headerPanel.add(logoutButton);
 
         // --- 左メニュー ---
         JPanel menuPanel = new JPanel();
@@ -68,7 +68,9 @@ public class HomePanel extends JPanel {
             {"🗓データ抽出（カレンダー）", "calendar"},
             {"📁インポート / エクスポート", "importexport"},
             {"👥グループ管理", "group"},
-            {"✏️編集", "editRecord"}
+            {"✏️編集", "editRecord"},
+            {"➕グループ作成", "createGroup"},
+            {"🔗グループ参加", "joinGroup"}
         };
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 12);
@@ -87,8 +89,6 @@ public class HomePanel extends JPanel {
                 setActiveMenu(name);
                 if (name.equals("addRecord")) {
                     mainFrame.showPanel("addRecord");
-                } else if (name.equals("editRecord")) {
-                    animateSwitchView(name);
                 } else {
                     animateSwitchView(name);
                 }
@@ -100,10 +100,18 @@ public class HomePanel extends JPanel {
 
             if (!name.equals("addRecord")) {
                 JPanel page;
-                if (name.equals("editRecord")) {
-                    page = new EditRecordPanel(mainFrame);
-                } else {
-                    page = createPage(label + "画面です。");
+                switch (name) {
+                    case "editRecord":
+                        page = new EditRecordPanel(mainFrame);
+                        break;
+                    case "createGroup":
+                        page = new GroupCreatePanel();
+                        break;
+                    case "joinGroup":
+                        page = new JoinGroupPanel(mainFrame);
+                        break;
+                    default:
+                        page = createPage(label + "画面です。");
                 }
                 page.setVisible(false);
                 views.put(name, page);
@@ -137,7 +145,7 @@ public class HomePanel extends JPanel {
             groupLabel.setText("");
         } else {
             usernameLabel.setText("ユーザーID：" + userId);
-            groupLabel.setText("グループ：" + (group == null ? "" : group));
+            groupLabel.setText("グループ：" + ((group == null || group.isEmpty()) ? "グループなし" : group));
         }
     }
 

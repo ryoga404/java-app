@@ -19,6 +19,8 @@ public class MainFrame extends JFrame {
     private Set<String> addedPanels = new HashSet<>();
     private Map<String, JPanel> panels = new HashMap<>();
 
+    private GroupDAO groupDAO = new GroupDAO(); // GroupDAOのインスタンス
+
     public MainFrame() {
         setTitle("家計簿アプリ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -64,36 +66,41 @@ public class MainFrame extends JFrame {
     }
 
     public void showPanel(String name) {
+        System.out.println("showPanel called with: " + name);
         SessionDAO sessionDAO = new SessionDAO();
         boolean validSession = (sessionId != null) && sessionDAO.isSessionValid(sessionId);
+        System.out.println("sessionId: " + sessionId + ", validSession: " + validSession);
 
-        // ログイン済みならlogin/registerに行こうとしたらhomeへ
-        if (name.equals("login") || name.equals("register")) {
-            if (validSession) {
-                name = "home";
-            }
-        } else if (!name.equals("top")) {
-            // ログインが必要な画面でセッション無効ならトップに戻す
-            if (!validSession) {
-                JOptionPane.showMessageDialog(this, "セッションが無効です。再ログインしてください。");
-                sessionId = null;
-                currentUserId = null;
-                name = "top";
-            }
+        if ((name.equals("login") || name.equals("register")) && validSession) {
+            System.out.println("Valid session exists. Redirecting to home.");
+            name = "home";
+        } else if (!name.equals("top") && !validSession && !(name.equals("login") || name.equals("register"))) {
+            System.out.println("Invalid session. Redirecting to top.");
+            JOptionPane.showMessageDialog(this, "セッションが無効です。再ログインしてください。");
+            sessionId = null;
+            currentUserId = null;
+            name = "top";
         }
 
-        // 動的に追加するパネル
+        // 動的パネルの追加処理
         if (name.equals("addRecord") && !addedPanels.contains(name)) {
             addPanel(name, new AddRecordPanel(this));
         } else if (name.equals("editRecord") && !addedPanels.contains(name)) {
             addPanel(name, new EditRecordPanel(this));
         }
 
-        // homeパネルにユーザー情報をセット
+        // ホーム画面の情報更新処理
         if (name.equals("home")) {
             HomePanel homePanel = (HomePanel) getPanel("home");
             if (homePanel != null) {
-                homePanel.setUserInfo(currentUserId, "", sessionId);
+                String groupName = "";
+                if (currentUserId != null) {
+                    groupName = groupDAO.getGroupNameByUserId(currentUserId);
+                    if (groupName == null || groupName.isEmpty()) {
+                        groupName = "グループなし";
+                    }
+                }
+                homePanel.setUserInfo(currentUserId, groupName, sessionId);
             }
         } else if (name.equals("addRecord")) {
             AddRecordPanel addPanel = (AddRecordPanel) getPanel("addRecord");
@@ -108,7 +115,7 @@ public class MainFrame extends JFrame {
             }
             editPanel.loadData();
             editPanel.updateTableData();
-            editPanel.refreshUserInfo();  // ← ここを追加！
+            editPanel.refreshUserInfo();
         }
 
         cardLayout.show(cardPanel, name);
