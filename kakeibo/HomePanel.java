@@ -105,7 +105,7 @@ public class HomePanel extends JPanel {
                         page = new EditRecordPanel(mainFrame);
                         break;
                     case "createGroup":
-                        page = new GroupCreatePanel();
+                        page = new GroupCreatePanel(mainFrame);
                         break;
                     case "joinGroup":
                         page = new JoinGroupPanel(mainFrame);
