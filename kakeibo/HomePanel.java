@@ -89,20 +89,19 @@ public class HomePanel extends JPanel {
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         }
 
-        // --- 画面用パネル ---
+        // --- 中央ビュー（画面表示部） ---
         viewPanel = new JPanel(null);
         viewPanel.setBackground(Color.WHITE);
 
-        // 画面パネル生成＆登録
+        // 各画面の登録
         views.put("addRecord", new AddRecordPanel(mainFrame));
         views.put("editRecord", new EditRecordPanel(mainFrame));
         views.put("calendar", createPage("カレンダー画面です。"));
         views.put("importexport", createPage("インポート / エクスポート画面です。"));
         views.put("group", createPage("グループ管理画面です。"));
-        views.put("createGroup", createPage("グループ作成画面です。"));
-        views.put("joinGroup", createPage("グループ参加画面です。"));
+        views.put("createGroup", new GroupCreatePanel(mainFrame));
+        views.put("joinGroup", new JoinGroupPanel(mainFrame));
 
-        // viewPanelに各画面追加
         for (JPanel panel : views.values()) {
             panel.setVisible(false);
             viewPanel.add(panel);
@@ -112,7 +111,6 @@ public class HomePanel extends JPanel {
         add(menuPanel, BorderLayout.WEST);
         add(viewPanel, BorderLayout.CENTER);
 
-        // 最初はaddRecord画面を表示
         setActiveMenu("addRecord");
         switchView("addRecord");
     }
@@ -146,7 +144,6 @@ public class HomePanel extends JPanel {
 
     private void animateSwitchView(String nextName) {
         if (nextName.equals(currentView)) return;
-
         switchView(nextName);
     }
 
@@ -163,14 +160,11 @@ public class HomePanel extends JPanel {
         next.setVisible(true);
         currentView = nextName;
 
-        // 画面切り替え後の初期化処理
-        if ("editRecord".equals(nextName) && next instanceof EditRecordPanel) {
-            EditRecordPanel editPanel = (EditRecordPanel) next;
+        if ("editRecord".equals(nextName) && next instanceof EditRecordPanel editPanel) {
             editPanel.refreshUserInfo();
             editPanel.loadData();
             editPanel.updateTableData();
-        } else if ("addRecord".equals(nextName) && next instanceof AddRecordPanel) {
-            AddRecordPanel addPanel = (AddRecordPanel) next;
+        } else if ("addRecord".equals(nextName) && next instanceof AddRecordPanel addPanel) {
             addPanel.refreshUserInfo();
         }
     }
