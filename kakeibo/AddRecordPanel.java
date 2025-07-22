@@ -1,21 +1,12 @@
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -28,81 +19,18 @@ public class AddRecordPanel extends JPanel {
     private MainFrame mainFrame;
     private JTextField dateField, amountField, memoField;
     private JComboBox<String> categoryCombo, typeCombo;
-    private JLabel userInfoLabel;
     private Map<String, Integer> categoryMap = new LinkedHashMap<>();
 
     private RecordDAO recordDAO = new RecordDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
 
-    // 左メニュー用コンポーネント
-    private HashMap<String, JButton> menuButtons = new HashMap<>();
-    private Color selectedColor = new Color(200, 220, 240);
-    private Color normalColor = Color.WHITE;
-
     public AddRecordPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
 
-        // --- ヘッダー ---
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
-        headerPanel.setBackground(new Color(60, 141, 188));
-
-        userInfoLabel = new JLabel("ログイン中: 未ログイン");
-        userInfoLabel.setForeground(Color.WHITE);
-        userInfoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
-
-        JButton logoutButton = new JButton("ログアウト");
-        logoutButton.setFocusable(false);
-        logoutButton.addActionListener(e -> mainFrame.logout());
-
-        headerPanel.add(userInfoLabel);
-        headerPanel.add(logoutButton);
-
-        add(headerPanel, BorderLayout.NORTH);
-
-        // --- 左メニュー ---
-        JPanel menuPanel = new JPanel();
-        menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(new Color(245, 245, 245));
-        menuPanel.setPreferredSize(new Dimension(220, 600));
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
-
-        String[][] menuItems = {
-            {"📋データ登録", "addRecord"},
-            {"🗓データ抽出（カレンダー）", "calendar"},
-            {"📁インポート / エクスポート", "importexport"},
-            {"👥グループ管理", "group"},
-            {"✏️編集", "editRecord"}
-        };
-
-        Font btnFont = new Font("SansSerif", Font.BOLD, 12);
-        for (String[] item : menuItems) {
-            String label = item[0];
-            String name = item[1];
-
-            JButton btn = new JButton(label);
-            btn.setFont(btnFont);
-            btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-            btn.setBackground(name.equals("addRecord") ? selectedColor : normalColor);
-            btn.setFocusPainted(false);
-
-            btn.addActionListener(e -> {
-                setActiveMenu(name);
-                mainFrame.showPanel(name);
-            });
-
-            menuButtons.put(name, btn);
-            menuPanel.add(btn);
-            menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        }
-
-        add(menuPanel, BorderLayout.WEST);
-
-        // --- 入力フォーム ---
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(5,5,5,5);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0; gbc.gridy = 0;
@@ -159,23 +87,8 @@ public class AddRecordPanel extends JPanel {
         });
     }
 
-    private void setActiveMenu(String name) {
-        for (String key : menuButtons.keySet()) {
-            JButton btn = menuButtons.get(key);
-            btn.setBackground(key.equals(name) ? selectedColor : normalColor);
-        }
-    }
-
     public void refreshUserInfo() {
-        String sessionId = mainFrame.getSessionId();
-        String userId = getUserIdFromSession(sessionId);
-        userInfoLabel.setText("ログイン中: " + (userId == null ? "未ログイン" : userId));
-    }
-
-    private String getUserIdFromSession(String sessionId) {
-        if (sessionId == null) return null;
-        SessionDAO sessionDAO = new SessionDAO();
-        return sessionDAO.getUserIdBySession(sessionId);
+        // ユーザー情報更新処理があればここに
     }
 
     private void loadCategoriesByType(String type) {

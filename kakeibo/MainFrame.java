@@ -19,7 +19,7 @@ public class MainFrame extends JFrame {
     private Set<String> addedPanels = new HashSet<>();
     private Map<String, JPanel> panels = new HashMap<>();
 
-    private GroupDAO groupDAO = new GroupDAO(); // GroupDAOのインスタンス
+    private GroupDAO groupDAO = new GroupDAO();
 
     public MainFrame() {
         setTitle("家計簿アプリ");
@@ -33,7 +33,7 @@ public class MainFrame extends JFrame {
         addPanel("top", new TopPanel(this));
         addPanel("register", new RegisterPanel(this));
         addPanel("login", new LoginPanel(this));
-        addPanel("home", new HomePanel(this));
+        addPanel("home", new HomePanel(this));  // HomePanelにAddRecord, EditRecordは内包
 
         add(cardPanel, BorderLayout.CENTER);
         showPanel("top");
@@ -82,14 +82,7 @@ public class MainFrame extends JFrame {
             name = "top";
         }
 
-        // 動的パネルの追加処理
-        if (name.equals("addRecord") && !addedPanels.contains(name)) {
-            addPanel(name, new AddRecordPanel(this));
-        } else if (name.equals("editRecord") && !addedPanels.contains(name)) {
-            addPanel(name, new EditRecordPanel(this));
-        }
-
-        // ホーム画面の情報更新処理
+        // 「home」画面を表示する際にユーザ情報セット
         if (name.equals("home")) {
             HomePanel homePanel = (HomePanel) getPanel("home");
             if (homePanel != null) {
@@ -100,22 +93,8 @@ public class MainFrame extends JFrame {
                         groupName = "グループなし";
                     }
                 }
-                homePanel.setUserInfo(currentUserId, groupName, sessionId);
+                homePanel.setUserInfo(currentUserId, groupName);
             }
-        } else if (name.equals("addRecord")) {
-            AddRecordPanel addPanel = (AddRecordPanel) getPanel("addRecord");
-            if (addPanel != null) {
-                addPanel.refreshUserInfo();
-            }
-        } else if (name.equals("editRecord")) {
-            EditRecordPanel editPanel = (EditRecordPanel) getPanel("editRecord");
-            if (editPanel == null) {
-                editPanel = new EditRecordPanel(this);
-                addPanel("editRecord", editPanel);
-            }
-            editPanel.loadData();
-            editPanel.updateTableData();
-            editPanel.refreshUserInfo();
         }
 
         cardLayout.show(cardPanel, name);

@@ -1,5 +1,3 @@
-//package kakeibo;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -23,14 +21,12 @@ public class HomePanel extends JPanel {
     private HashMap<String, JPanel> views = new HashMap<>();
     private HashMap<String, JButton> menuButtons = new HashMap<>();
     private String currentView = null;
-    private Color selectedColor = new Color(200, 220, 240);
-    private Color normalColor = Color.WHITE;
+    private final Color selectedColor = new Color(200, 220, 240);
+    private final Color normalColor = Color.WHITE;
 
     private JLabel usernameLabel;
     private JLabel groupLabel;
     private JButton logoutButton;
-
-    private String sessionId;
 
     public HomePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -48,9 +44,7 @@ public class HomePanel extends JPanel {
         groupLabel.setForeground(Color.WHITE);
         logoutButton.setFocusable(false);
 
-        logoutButton.addActionListener(e -> {
-            mainFrame.logout();
-        });
+        logoutButton.addActionListener(e -> mainFrame.logout());
 
         headerPanel.add(usernameLabel);
         headerPanel.add(groupLabel);
@@ -65,10 +59,10 @@ public class HomePanel extends JPanel {
 
         String[][] menuItems = {
             {"📋データ登録", "addRecord"},
+            {"✏️編集", "editRecord"},
             {"🗓データ抽出（カレンダー）", "calendar"},
             {"📁インポート / エクスポート", "importexport"},
             {"👥グループ管理", "group"},
-            {"✏️編集", "editRecord"},
             {"➕グループ作成", "createGroup"},
             {"🔗グループ参加", "joinGroup"}
         };
@@ -87,59 +81,43 @@ public class HomePanel extends JPanel {
 
             btn.addActionListener(e -> {
                 setActiveMenu(name);
-                if (name.equals("addRecord")) {
-                    mainFrame.showPanel("addRecord");
-                } else {
-                    animateSwitchView(name);
-                }
+                animateSwitchView(name);
             });
 
             menuButtons.put(name, btn);
             menuPanel.add(btn);
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-
-            if (!name.equals("addRecord")) {
-                JPanel page;
-                switch (name) {
-                    case "editRecord":
-                        page = new EditRecordPanel(mainFrame);
-                        break;
-                    case "createGroup":
-                        page = new GroupCreatePanel(mainFrame);
-                        break;
-                    case "joinGroup":
-                        page = new JoinGroupPanel(mainFrame);
-                        break;
-                    default:
-                        page = createPage(label + "画面です。");
-                }
-                page.setVisible(false);
-                views.put(name, page);
-            }
         }
 
+        // --- 画面用パネル ---
         viewPanel = new JPanel(null);
         viewPanel.setBackground(Color.WHITE);
+
+        // 画面パネル生成＆登録
+        views.put("addRecord", new AddRecordPanel(mainFrame));
+        views.put("editRecord", new EditRecordPanel(mainFrame));
+        views.put("calendar", createPage("カレンダー画面です。"));
+        views.put("importexport", createPage("インポート / エクスポート画面です。"));
+        views.put("group", createPage("グループ管理画面です。"));
+        views.put("createGroup", createPage("グループ作成画面です。"));
+        views.put("joinGroup", createPage("グループ参加画面です。"));
+
+        // viewPanelに各画面追加
         for (JPanel panel : views.values()) {
+            panel.setVisible(false);
             viewPanel.add(panel);
         }
-
-        setActiveMenu("calendar");
-        if (views.containsKey("calendar")) {
-            views.get("calendar").setBounds(0, 0, 1000, 1000);
-            views.get("calendar").setVisible(true);
-            currentView = "calendar";
-        }
-
-        setUserInfo(null, null, null);
 
         add(headerPanel, BorderLayout.NORTH);
         add(menuPanel, BorderLayout.WEST);
         add(viewPanel, BorderLayout.CENTER);
+
+        // 最初はaddRecord画面を表示
+        setActiveMenu("addRecord");
+        switchView("addRecord");
     }
 
-    public void setUserInfo(String userId, String group, String sessionId) {
-        this.sessionId = sessionId;
+    public void setUserInfo(String userId, String group) {
         if (userId == null || userId.isEmpty()) {
             usernameLabel.setText("ログインしていません");
             groupLabel.setText("");
@@ -147,10 +125,6 @@ public class HomePanel extends JPanel {
             usernameLabel.setText("ユーザーID：" + userId);
             groupLabel.setText("グループ：" + ((group == null || group.isEmpty()) ? "グループなし" : group));
         }
-    }
-
-    public void setUserInfo(String userId, String group) {
-        setUserInfo(userId, group, null);
     }
 
     private JPanel createPage(String text) {
@@ -173,30 +147,31 @@ public class HomePanel extends JPanel {
     private void animateSwitchView(String nextName) {
         if (nextName.equals(currentView)) return;
 
-        JPanel current = views.get(currentView);
+        switchView(nextName);
+    }
+
+    private void switchView(String nextName) {
+        if (currentView != null) {
+            JPanel current = views.get(currentView);
+            current.setVisible(false);
+        }
+
         JPanel next = views.get(nextName);
-        int width = viewPanel.getWidth();
+        if (next == null) return;
 
-        current.setBounds(0, 0, width, viewPanel.getHeight());
-        next.setBounds(width, 0, width, viewPanel.getHeight());
+        next.setBounds(0, 0, viewPanel.getWidth(), viewPanel.getHeight());
         next.setVisible(true);
+        currentView = nextName;
 
-        javax.swing.Timer timer = new javax.swing.Timer(5, null);
-        final int[] x = {0};
-
-        timer.addActionListener(e -> {
-            x[0] += 20;
-            current.setLocation(-x[0], 0);
-            next.setLocation(width - x[0], 0);
-
-            if (x[0] >= width) {
-                timer.stop();
-                current.setVisible(false);
-                next.setLocation(0, 0);
-                currentView = nextName;
-            }
-        });
-
-        timer.start();
+        // 画面切り替え後の初期化処理
+        if ("editRecord".equals(nextName) && next instanceof EditRecordPanel) {
+            EditRecordPanel editPanel = (EditRecordPanel) next;
+            editPanel.refreshUserInfo();
+            editPanel.loadData();
+            editPanel.updateTableData();
+        } else if ("addRecord".equals(nextName) && next instanceof AddRecordPanel) {
+            AddRecordPanel addPanel = (AddRecordPanel) next;
+            addPanel.refreshUserInfo();
+        }
     }
 }
