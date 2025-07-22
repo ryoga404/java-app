@@ -1,10 +1,18 @@
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -21,6 +29,8 @@ public class MainFrame extends JFrame {
 
     private GroupDAO groupDAO = new GroupDAO();
 
+    private Clip musicClip;
+
     public MainFrame() {
         setTitle("家計簿アプリ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,9 +43,10 @@ public class MainFrame extends JFrame {
         addPanel("top", new TopPanel(this));
         addPanel("register", new RegisterPanel(this));
         addPanel("login", new LoginPanel(this));
-        addPanel("home", new HomePanel(this));  // HomePanelにAddRecord, EditRecordは内包
+        addPanel("home", new HomePanel(this)); // AddRecord, EditRecord を含む
 
         add(cardPanel, BorderLayout.CENTER);
+        playBackgroundMusic();
         showPanel("top");
     }
 
@@ -82,7 +93,7 @@ public class MainFrame extends JFrame {
             name = "top";
         }
 
-        // 「home」画面を表示する際にユーザ情報セット
+        // home に遷移するときにユーザ情報をセット
         if (name.equals("home")) {
             HomePanel homePanel = (HomePanel) getPanel("home");
             if (homePanel != null) {
@@ -112,5 +123,31 @@ public class MainFrame extends JFrame {
         sessionId = null;
         currentUserId = null;
         showPanel("top");
+    }
+
+    private void playBackgroundMusic() {
+        try {
+            InputStream audioSrc = getClass().getResourceAsStream("resources/music.wav");
+            if (audioSrc == null) {
+                System.err.println("music.wav が見つかりません。");
+                return;
+            }
+
+            InputStream bufferedIn = new java.io.BufferedInputStream(audioSrc);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(bufferedIn);
+
+            musicClip = AudioSystem.getClip();
+            musicClip.open(audioStream);
+            musicClip.loop(Clip.LOOP_CONTINUOUSLY); // ループ再生
+
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopBackgroundMusic() {
+        if (musicClip != null && musicClip.isRunning()) {
+            musicClip.stop();
+        }
     }
 }
