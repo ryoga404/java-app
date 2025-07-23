@@ -9,11 +9,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class ExportAndImportPanel extends JPanel {
+public class ExportPanel extends JPanel {
 
     private MainFrame mainFrame;
 
-    public ExportAndImportPanel(MainFrame mainFrame) {
+    public ExportPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
