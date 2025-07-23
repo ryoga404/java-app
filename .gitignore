@@ -1,3 +1,4 @@
 /.metadata/
 kakeibo/**/*.class
 /Servers/
+*.class
