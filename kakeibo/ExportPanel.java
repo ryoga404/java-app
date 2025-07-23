@@ -8,6 +8,12 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class ExportPanel extends JPanel {
 
@@ -18,17 +24,13 @@ public class ExportPanel extends JPanel {
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
         JButton exportButton = new JButton("エクスポート");
-        JButton importButton = new JButton("インポート");
-
         exportButton.addActionListener(this::handleExport);
-        importButton.addActionListener(this::handleImport); // ← 中身はファイルを開くだけ
 
         add(exportButton);
-        add(importButton);
     }
 
     private void handleExport(ActionEvent e) {
-        String userId = mainFrame.getCurrentUserId(); // ログイン中のユーザーID取得
+        String userId = mainFrame.getCurrentUserId();
 
         if (userId == null || userId.isEmpty()) {
             JOptionPane.showMessageDialog(this, "ユーザーがログインしていません。", "エラー", JOptionPane.ERROR_MESSAGE);
@@ -43,8 +45,8 @@ public class ExportPanel extends JPanel {
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("保存先を選択してください");
-        int result = fileChooser.showSaveDialog(this);
 
+        int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             if (!file.getName().endsWith(".xml")) {
@@ -58,21 +60,43 @@ public class ExportPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "保存に失敗しました: " + ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
+
+            // ★ ここでXMLパース（読み取り）テストだけ実施（結果はコンソールに表示）
+            parseXml(file);
         }
     }
 
-    private void handleImport(ActionEvent e) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("インポートするXMLファイルを選択");
+    // XMLファイルからRecordを読み取る（テスト用）
+    private void parseXml(File file) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(file);
 
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            JOptionPane.showMessageDialog(this, "ファイルが選択されました: \n" + file.getAbsolutePath(), "情報", JOptionPane.INFORMATION_MESSAGE);
+            NodeList recordList = doc.getElementsByTagName("record");
+            System.out.println("[XML パース結果] " + recordList.getLength() + " 件読み込み");
 
-            // パース処理はまだしない（ここで止めてOK）
-            // 今後、パースして RecordDAO に登録したい場合はここに追加
+            for (int i = 0; i < recordList.getLength(); i++) {
+                Element element = (Element) recordList.item(i);
+                String id = getText(element, "id");
+                String userId = getText(element, "userId");
+                String category = getText(element, "category");
+                int amount = Integer.parseInt(getText(element, "amount"));
+                String date = getText(element, "date");
+                String memo = getText(element, "memo");
+
+                System.out.printf("Record[%d]: id=%s, userId=%s, category=%s, amount=%d, date=%s, memo=%s%n",
+                        i + 1, id, userId, category, amount, date, memo);
+            }
+        } catch (Exception e) {
+            System.err.println("XMLの読み取りに失敗: " + e.getMessage());
         }
+    }
+
+    private String getText(Element parent, String tag) {
+        NodeList nodeList = parent.getElementsByTagName(tag);
+        if (nodeList.getLength() == 0) return "";
+        return nodeList.item(0).getTextContent();
     }
 
     private String generateXml(List<Record> records) {
