@@ -49,8 +49,8 @@ public class PuzzleCaptchaPanel extends JPanel {
     private void loadAndResizeImage() {
         try {
         	Random random = new Random();
-        	int randomS = random.nextInt(4)+1;
-        	BufferedImage original = ImageIO.read(new File("resources/img"+randomS+".jpeg"));
+        	int randomS = random.nextInt(10)+1;
+        	BufferedImage original = ImageIO.read(new File("resources/image"+randomS+".jpeg"));
             
             int w = original.getWidth();
             int h = original.getHeight();
@@ -69,7 +69,7 @@ public class PuzzleCaptchaPanel extends JPanel {
                 background = original;
             }
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "背景画像の読み込みに失敗しました。\nresources/img0.jpg を確認してください。", "エラー", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "背景画像の読み込みに失敗しました。\nresources/img0.jpeg を確認してください。", "エラー", JOptionPane.ERROR_MESSAGE);
         }
     }
 
