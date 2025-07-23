@@ -54,7 +54,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
         JLabel titleLabel = new JLabel("新規登録");
         titleLabel.setFont(new Font("Meiryo", Font.BOLD, 28));
         titleLabel.setForeground(labelColor);
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
+        titleLabel.setAlignmentX(LEFT_ALIGNMENT);
         titleLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, titleLabel.getPreferredSize().height));
 
         JLabel userLabel = new JLabel("ユーザー名（英数字8〜20文字）");
@@ -97,7 +97,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
         JButton tButton = new JButton("登録");
         tButton.setFont(buttonFont);
         tButton.setMaximumSize(new Dimension(120, 40));
-        tButton.setAlignmentX(CENTER_ALIGNMENT);
+        tButton.setAlignmentX(LEFT_ALIGNMENT);
         // ボタンの境界線を消す設定
         tButton.setOpaque(true);
         tButton.setContentAreaFilled(true);
@@ -108,7 +108,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
         JButton TOPButton = new JButton("TOP");
         TOPButton.setFont(buttonFont);
         TOPButton.setMaximumSize(new Dimension(120, 40));
-        TOPButton.setAlignmentX(CENTER_ALIGNMENT);
+        TOPButton.setAlignmentX(LEFT_ALIGNMENT);
         // ボタンの境界線を消す設定
         TOPButton.setOpaque(true);
         TOPButton.setContentAreaFilled(true);
@@ -119,14 +119,14 @@ public class RegisterPanel extends JPanel implements ActionListener {
         });
 
         // パスワード条件ラベル（ウィンドウ下部に表示）
-        JLabel passConditionLabel = new JLabel("<html><i>※パスワードは8文字以上、大文字・小文字・数字を含む。特殊文字は (!#@_ )</i></html>");
+        JLabel passConditionLabel = new JLabel("<html><i>※パスワードは8文字以上、大文字・小文字・数字・特殊文字を含む。特殊文字は (!#@_ )</i></html>");
         passConditionLabel.setFont(new Font("Meiryo", Font.PLAIN, 17));
         passConditionLabel.setForeground(Color.DARK_GRAY);
         passConditionLabel.setAlignmentX(CENTER_ALIGNMENT);
         passConditionLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         add(titleLabel);
-        add(Box.createRigidArea(new Dimension(0, 20)));
+        add(Box.createRigidArea(new Dimension(0, 15)));
 
         add(userLabel);
         add(userIDField);
@@ -138,10 +138,10 @@ public class RegisterPanel extends JPanel implements ActionListener {
 
         add(pass2Label);
         add(pass2);
-        add(Box.createRigidArea(new Dimension(0, 25)));
-
+        add(Box.createRigidArea(new Dimension(10, 15)));
+        
         add(tButton);
-        add(Box.createRigidArea(new Dimension(0, 10)));
+        add(Box.createRigidArea(new Dimension(10, 15)));
         add(TOPButton);
 
         // 下にスペースを作ってパスワード条件を配置
