@@ -2,7 +2,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileReader;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -10,23 +9,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class ImportPanel extends JPanel {
 
     private MainFrame mainFrame;
+    private RecordDAO recordDAO = new RecordDAO(); // レコード管理用DAO
 
     public ImportPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
         JButton importButton = new JButton("インポート");
-
         importButton.addActionListener(this::handleImport);
 
         add(importButton);
@@ -39,22 +36,10 @@ public class ImportPanel extends JPanel {
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            JOptionPane.showMessageDialog(this, "ファイルが選択されました: \n" + file.getAbsolutePath(), "情報", JOptionPane.INFORMATION_MESSAGE);
 
-            try {
-                List<Record> records = parseXml(file);
-                if (records.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "インポートするデータがありません。", "情報", JOptionPane.INFORMATION_MESSAGE);
-                    return;
-                }
-
-                // RecordDAOにインポートされたレコードを保存する処理
-                for (Record record : records) {
-                    RecordDAO.addRecord(record);
-                }
-
-                JOptionPane.showMessageDialog(this, "インポートが完了しました。", "完了", JOptionPane.INFORMATION_MESSAGE);
-
+            try (FileReader reader = new FileReader(file)) {
+                // XMLファイルをパースしてレコードをインポート
+                importFromXml(file);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "インポートに失敗しました: " + ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
@@ -62,43 +47,48 @@ public class ImportPanel extends JPanel {
         }
     }
 
-    private List<Record> parseXml(File file) throws Exception {
-        // XMLパース処理
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
+    private void importFromXml(File file) throws Exception {
         try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException ex) {
-            throw new Exception("XMLパーサーの初期化に失敗しました: " + ex.getMessage());
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(file);
+
+            NodeList recordNodes = doc.getElementsByTagName("record");
+            if (recordNodes.getLength() == 0) {
+                JOptionPane.showMessageDialog(this, "インポートするデータがありません。", "情報", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            // レコードをデータベースにインポート
+            for (int i = 0; i < recordNodes.getLength(); i++) {
+                Element element = (Element) recordNodes.item(i);
+
+                String id = getText(element, "id");
+                String userId = getText(element, "userId");
+                String category = getText(element, "category");
+                int amount = Integer.parseInt(getText(element, "amount"));
+                String date = getText(element, "date");
+                String memo = getText(element, "memo");
+
+                // レコードをデータベースに追加
+                boolean success = recordDAO.addRecordByUserId(userId, java.sql.Date.valueOf(date), 0, category, amount, memo);
+                if (!success) {
+                    throw new Exception("レコードのインポートに失敗しました: " + id);
+                }
+            }
+
+            JOptionPane.showMessageDialog(this, "インポートが完了しました。", "完了", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "インポート中にエラーが発生しました: " + ex.getMessage(), "エラー", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
+    }
 
-        Document document;
-        try (FileReader reader = new FileReader(file)) {
-            document = builder.parse(new org.xml.sax.InputSource(reader));
-        } catch (SAXException | java.io.IOException ex) {
-            throw new Exception("XMLのパースに失敗しました: " + ex.getMessage());
-        }
-
-        NodeList recordNodes = document.getElementsByTagName("record");
-        if (recordNodes.getLength() == 0) {
-            return List.of();  // レコードがない場合は空リストを返す
-        }
-
-        List<Record> records = new java.util.ArrayList<>();
-        for (int i = 0; i < recordNodes.getLength(); i++) {
-            Element recordElement = (Element) recordNodes.item(i);
-            String id = recordElement.getElementsByTagName("id").item(0).getTextContent();
-            String userId = recordElement.getElementsByTagName("userId").item(0).getTextContent();
-            String category = recordElement.getElementsByTagName("category").item(0).getTextContent();
-            double amount = Double.parseDouble(recordElement.getElementsByTagName("amount").item(0).getTextContent());
-            String date = recordElement.getElementsByTagName("date").item(0).getTextContent();
-            String memo = recordElement.getElementsByTagName("memo").item(0).getTextContent();
-
-            // Recordオブジェクトに変換してリストに追加
-            Record record = new Record(id, userId, category, amount, date, memo);
-            records.add(record);
-        }
-
-        return records;
+    // XMLノードからタグの値を取得するヘルパーメソッド
+    private String getText(Element parent, String tag) {
+        NodeList nodeList = parent.getElementsByTagName(tag);
+        if (nodeList.getLength() == 0) return "";
+        return nodeList.item(0).getTextContent();
     }
 }
