@@ -1,10 +1,19 @@
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
+
+import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
 
 public class PuzzleCaptchaPanel extends JPanel {
     private BufferedImage background;
@@ -39,7 +48,10 @@ public class PuzzleCaptchaPanel extends JPanel {
 
     private void loadAndResizeImage() {
         try {
-            BufferedImage original = ImageIO.read(new File("resources/img0.jpg"));
+        	Random random = new Random();
+        	int randomS = random.nextInt(4)+1;
+        	BufferedImage original = ImageIO.read(new File("resources/img"+randomS+".jpeg"));
+            
             int w = original.getWidth();
             int h = original.getHeight();
 
