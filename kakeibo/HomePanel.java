@@ -4,8 +4,12 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.HashMap;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -28,9 +32,19 @@ public class HomePanel extends JPanel {
     private JLabel groupLabel;
     private JButton logoutButton;
 
+    private BufferedImage backgroundImage;
+
     public HomePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
+
+        // === 背景画像読み込み ===
+        try {
+            backgroundImage = ImageIO.read(getClass().getResource("/resources/image.jpg"));
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("背景画像が見つかりません: " + e.getMessage());
+            backgroundImage = null;
+        }
 
         // --- ヘッダー ---
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -53,7 +67,7 @@ public class HomePanel extends JPanel {
         // --- 左メニュー ---
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(new Color(245, 245, 245));
+        menuPanel.setOpaque(false);  // 背景透過
         menuPanel.setPreferredSize(new Dimension(220, 600));
         menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
@@ -89,9 +103,9 @@ public class HomePanel extends JPanel {
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         }
 
-        // --- 中央ビュー（画面表示部） ---
+        // --- 中央ビュー ---
         viewPanel = new JPanel(null);
-        viewPanel.setBackground(Color.WHITE);
+        viewPanel.setOpaque(false);  // 背景透過
 
         // 各画面の登録
         views.put("addRecord", new AddRecordPanel(mainFrame));
@@ -104,6 +118,7 @@ public class HomePanel extends JPanel {
 
         for (JPanel panel : views.values()) {
             panel.setVisible(false);
+            panel.setOpaque(false);  // 背景透過
             viewPanel.add(panel);
         }
 
@@ -113,6 +128,15 @@ public class HomePanel extends JPanel {
 
         setActiveMenu("addRecord");
         switchView("addRecord");
+    }
+
+    // === 背景画像描画 ===
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     public void setUserInfo(String userId, String group) {
@@ -127,10 +151,10 @@ public class HomePanel extends JPanel {
 
     private JPanel createPage(String text) {
         JPanel panel = new JPanel(new BorderLayout());
+        panel.setOpaque(false);
         JLabel label = new JLabel(text, SwingConstants.CENTER);
         label.setFont(new Font("SansSerif", Font.PLAIN, 16));
         label.setForeground(new Color(80, 80, 80));
-        panel.setBackground(Color.WHITE);
         panel.add(label, BorderLayout.CENTER);
         return panel;
     }
