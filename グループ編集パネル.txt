@@ -1,0 +1,67 @@
+MariaDB [kakeibo]> show tables;
++-------------------+
+| Tables_in_kakeibo |
++-------------------+
+| category          |
+| groupmember       |
+| grouptable        |
+| record            |
+| salt              |
+| session           |
+| user              |
++-------------------+
+7 rows in set (0.095 sec)
+
+MariaDB [kakeibo]> desc groupmember;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| GroupId | int(11)     | NO   | PRI | NULL    |       |
+| *UserId  | varchar(50) | NO   | PRI | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+2 rows in set (0.691 sec)
+
+MariaDB [kakeibo]> desc grouptable;
++-----------+--------------+------+-----+---------+----------------+
+| Field     | Type         | Null | Key | Default | Extra          |
++-----------+--------------+------+-----+---------+----------------+
+| GroupId   | int(11)      | NO   | PRI | NULL    | auto_increment |
+| *GroupName | varchar(100) | NO   |     | NULL    |                |
++-----------+--------------+------+-----+---------+----------------+
+2 rows in set (0.299 sec)
+
+MariaDB [kakeibo]> desc User;
++----------------+--------------+------+-----+---------+-------+
+| Field          | Type         | Null | Key | Default | Extra |
++----------------+--------------+------+-----+---------+-------+
+| UserId         | varchar(50)  | NO   | PRI | NULL    |       |
+| HashedPassword | varchar(255) | NO   |     | NULL    |       |
++----------------+--------------+------+-----+---------+-------+
+2 rows in set (0.198 sec)
+
+MariaDB [kakeibo]> desc record;
++------------+-------------+------+-----+---------+----------------+
+| Field      | Type        | Null | Key | Default | Extra          |
++------------+-------------+------+-----+---------+----------------+
+| RecordId   | int(11)     | NO   | PRI | NULL    | auto_increment |
+| UserId     | varchar(50) | YES  | MUL | NULL    |                |
+| *Date       | date        | NO   |     | NULL    |                |
+| CategoryId | int(11)     | YES  | MUL | NULL    |                |
+| *Type       | varchar(10) | YES  |     | NULL    |                |
+| *Amount     | int(11)     | YES  |     | NULL    |                |
+| *Memo       | text        | YES  |     | NULL    |                |
++------------+-------------+------+-----+---------+----------------+
+7 rows in set (0.249 sec)
+
+MariaDB [kakeibo]> desc category;
++--------------+------------------+------+-----+---------+----------------+
+| Field        | Type             | Null | Key | Default | Extra          |
++--------------+------------------+------+-----+---------+----------------+
+| CategoryId   | int(11)          | NO   | PRI | NULL    | auto_increment |
+| *CategoryName | varchar(100)     | NO   |     | NULL    |                |
+| *CategoryType | enum('IN','OUT') | NO   |     | NULL    |                |
++--------------+------------------+------+-----+---------+----------------+
+3 rows in set (0.300 sec)
+
+MariaDB [kakeibo]>
+
