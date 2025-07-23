@@ -1,9 +1,31 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.table.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 
 public class GroupCreatePanel extends JPanel {
 
@@ -47,12 +69,6 @@ public class GroupCreatePanel extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(new EmptyBorder(15, 15, 15, 15));
         setBackground(secondaryColor);
-
-        JLabel loginLabel = new JLabel("ログインID: " + mainFrame.getCurrentUserId());
-        loginLabel.setFont(new Font("Dialog", Font.BOLD, 16));
-        loginLabel.setForeground(primaryColor);
-        loginLabel.setBorder(new EmptyBorder(0, 0, 10, 0));
-        add(loginLabel, BorderLayout.NORTH);
 
         setupLeftPanel(primaryColor, normalFont, accentColor);
         setupCenterPanel(primaryColor, secondaryColor, normalFont);
