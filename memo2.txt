@@ -1,0 +1,59 @@
+修正箇所
+
+　・Enterでログインするように（ログイン画面）
+　　現状：ログインボタンを押さないとログイン処理が始まらない
+
+　・パズル認証　Enterで認証するように
+　　現状：認証するボタンを押さないと認証できない
+
+　・ホーム画面にてデータ登録ボタンが機能しない部分
+　
+　・左メニュー
+　　データ抽出（カレンダー.....）をデータ抽出に変更
+
+　
+　・グループ参加画面
+　　上部（灰色）の「ホームへ戻る」「ログアウト」削除
+
+
+【要件定義メモ】インポート機能（ログインユーザへの登録）
+
+■目的
+他ユーザがエクスポートしたCSVファイルを、現在ログインしているユーザのデータとして取り込む。
+
+■前提
+・CSVは以下の形式（ヘッダーあり）  
+  Date,CategoryType,CategoryName,Amount,Memo  
+・UserIdは含まれていないため、ログインユーザのIDをすべてのデータに付与する
+
+■処理概要
+1. CSVを1行ずつ読み取る（1行目はヘッダーとしてスキップ）
+2. CategoryNameとCategoryTypeの組み合わせから、CategoryIdを取得  
+   → 存在しない場合は新規登録
+3. Recordテーブルに1行ずつINSERTする  
+   ・UserId：現在のログインユーザID  
+   ・Date, CategoryId, Amount, Memo：CSVから取得
+
+■カテゴリID取得 or 挿入SQL
+-- 既存カテゴリ取得
+SELECT CategoryId FROM Category WHERE CategoryName = ? AND CategoryType = ?;
+
+-- 存在しなければ新規作成
+INSERT INTO Category (CategoryName, CategoryType) VALUES (?, ?);
+
+■インポートINSERT用SQL
+INSERT INTO Record (UserId, Date, CategoryId, Type, Amount, Memo)
+VALUES (?, ?, ?, ?, ?, ?);
+
+→ ? にはログインユーザID、CSVから取得した日付、カテゴリID、タイプ、金額、メモを代入
+
+■注意点
+・文字コードはUTF-8前提
+・1件でもINSERT失敗した場合、トランザクションをロールバックする設計が望ましい
+・メモ欄に改行やカンマが含まれていても正しく処理できるようにCSVはダブルクォートで囲む形式推奨
+・CategoryTypeが"IN" or "OUT"以外の場合はスキップまたは警告
+
+■ファイル形式
+・拡張子：.csv（または .txt）
+・文字コード：UTF-8
+

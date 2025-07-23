@@ -1,0 +1,39 @@
+【要件定義メモ】エクスポート機能（ログインユーザのみ）
+
+■目的
+ログインしているユーザの記録をCSV形式でエクスポートし、他のユーザにインポートできるようにする。
+
+■SQL文
+SELECT 
+    r.Date, 
+    c.CategoryType, 
+    c.CategoryName, 
+    r.Amount, 
+    r.Memo
+FROM 
+    Record r
+JOIN 
+    Category c ON r.CategoryId = c.CategoryId
+WHERE 
+    r.UserId = ?
+ORDER BY 
+    r.Date;
+
+→ ? の部分にはログイン中の UserId をセットすること。
+
+■CSV出力形式（ヘッダー付き）
+Date,CategoryType,CategoryName,Amount,Memo
+
+■注意点
+・メモにカンマが含まれていた場合、半角スペースに置換する
+・メモ内の改行（\r, \n）は削除またはスペースに変換
+・CSVは日付昇順で出力される
+・UserId は出力しない（インポート時に現在のログインユーザIDが使われる）
+
+■ファイル形式
+・文字コード：UTF-8
+・ファイル拡張子：.csv（ただし .txt でも可）
+
+■補足
+・このCSVはインポート機能でそのまま利用できる形式で出力すること
+・データ移行先でログインしているユーザが新しい UserId になる
