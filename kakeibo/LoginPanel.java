@@ -24,6 +24,9 @@ public class LoginPanel extends JPanel {
     private MainFrame mainFrame;
     private BufferedImage backgroundImage;
 
+    private JTextField idField;        // フィールド化
+    private JPasswordField passField;  // フィールド化
+
     public LoginPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
 
@@ -39,13 +42,13 @@ public class LoginPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
         setOpaque(false);
 
-        // --- ログイン画面ラベル追加 ---
+        // ログイン画面ラベル
         JLabel titleLabel = new JLabel("ログイン画面");
         titleLabel.setFont(new Font("Meiryo", Font.BOLD, 28));
         titleLabel.setForeground(Color.BLACK);
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);  // 横中央寄せ
+        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
         add(titleLabel);
-        add(Box.createRigidArea(new Dimension(0, 30)));  // ラベルとフォームの間に空白を追加
+        add(Box.createRigidArea(new Dimension(0, 30)));
 
         Font labelFont = new Font("Meiryo", Font.BOLD, 20);
         Font fieldFont = new Font("Meiryo", Font.PLAIN, 14);
@@ -66,7 +69,7 @@ public class LoginPanel extends JPanel {
         idLabel.setMinimumSize(labelSize);
         idLabel.setMaximumSize(labelSize);
 
-        JTextField idField = new JTextField();
+        idField = new JTextField();  // フィールドにセット
         idField.setFont(fieldFont);
         idField.setBackground(Color.WHITE);
         idField.setPreferredSize(fieldSize);
@@ -89,7 +92,7 @@ public class LoginPanel extends JPanel {
         passLabel.setMinimumSize(labelSize);
         passLabel.setMaximumSize(labelSize);
 
-        JPasswordField passField = new JPasswordField();
+        passField = new JPasswordField();  // フィールドにセット
         passField.setFont(fieldFont);
         passField.setBackground(Color.WHITE);
         passField.setPreferredSize(fieldSize);
@@ -151,6 +154,7 @@ public class LoginPanel extends JPanel {
                     mainFrame.showPanel("home");
                 }
                 JOptionPane.showMessageDialog(this, "ログイン成功！");
+                clearInputFields();  // 成功後に入力欄クリアしても良い
             } else {
                 JOptionPane.showMessageDialog(this, "セッションの作成に失敗しました。");
             }
@@ -158,17 +162,24 @@ public class LoginPanel extends JPanel {
 
         backBtn.addActionListener(e -> {
             if (mainFrame != null) {
+                clearInputFields();  // 戻る時もクリア
                 mainFrame.showPanel("top");
             } else {
                 JOptionPane.showMessageDialog(this, "TOPへ戻ります（ダミー）");
             }
         });
 
-        // パネルを順番に配置
+        // パネル配置
         add(idPanel);
         add(Box.createRigidArea(new Dimension(0, 18)));
         add(passPanel);
         add(buttonPanel);
+    }
+
+    /** 入力欄を空にするメソッド */
+    public void clearInputFields() {
+        idField.setText("");
+        passField.setText("");
     }
 
     @Override
@@ -177,7 +188,7 @@ public class LoginPanel extends JPanel {
 
         if (backgroundImage != null) {
             Graphics2D g2 = (Graphics2D) g.create();
-            float alpha = 0.3f;  // 透明度30%
+            float alpha = 0.3f;
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
             g2.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
             g2.dispose();
@@ -186,15 +197,5 @@ public class LoginPanel extends JPanel {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("ログイン画面テスト");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(460, 280);
-            frame.setContentPane(new LoginPanel(null));
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
-    }
 }
+
