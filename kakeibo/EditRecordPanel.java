@@ -3,29 +3,35 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 public class EditRecordPanel extends JPanel {
 
     private MainFrame mainFrame;
     private JTable table;
     private RecordTableModel tableModel;
-    private JButton prevButton, nextButton, saveButton, deleteButton;
+    private JButton prevButton, nextButton, saveButton, deleteButton, filterButton;
     private int currentPage = 0;
     private final int pageSize = 10;
     private List<RecordDAO.Record> fullRecords;
@@ -34,6 +40,13 @@ public class EditRecordPanel extends JPanel {
     private final Map<String, Integer> outCategoryMap = new HashMap<>();
 
     private final String[] types = {"収入", "支出"};
+
+    // 追加：TableRowSorterでソート＆フィルター管理
+    private TableRowSorter<RecordTableModel> sorter;
+
+    // フィルター条件セット（タイプとカテゴリの表示中セット）
+    private Set<String> visibleTypes = new HashSet<>();
+    private Set<String> visibleCategories = new HashSet<>();
 
     public EditRecordPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -55,12 +68,22 @@ public class EditRecordPanel extends JPanel {
         outCategoryMap.put("医療費", 9);
         outCategoryMap.put("その他_支出", 10);
 
+        // フィルター初期値セット（全部表示）
+        visibleTypes.add("収入");
+        visibleTypes.add("支出");
+        visibleCategories.addAll(inCategoryMap.keySet());
+        visibleCategories.addAll(outCategoryMap.keySet());
+
         // --- テーブル構築 ---
         tableModel = new RecordTableModel();
         table = new JTable(tableModel);
         table.setRowHeight(24);
         table.setFillsViewportHeight(true);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // TableRowSorterをセット（これでヘッダークリックでソート可能）
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
 
         // 列幅調整
         int[] columnWidths = {50, 90, 60, 100, 80, 200};
@@ -94,8 +117,9 @@ public class EditRecordPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         prevButton = new JButton("前へ");
         nextButton = new JButton("次へ");
-        saveButton = new JButton("保存");
+        saveButton = new JButton("更新");
         deleteButton = new JButton("削除");
+        filterButton = new JButton("フィルター設定"); // 追加
 
         prevButton.addActionListener(e -> {
             if (currentPage > 0) {
@@ -138,10 +162,14 @@ public class EditRecordPanel extends JPanel {
             loadData();
         });
 
+        // フィルター設定ボタン押下時の処理
+        filterButton.addActionListener(e -> openFilterDialog());
+
         buttonPanel.add(prevButton);
         buttonPanel.add(nextButton);
         buttonPanel.add(saveButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(filterButton); // 追加
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
@@ -178,6 +206,9 @@ public class EditRecordPanel extends JPanel {
 
         List<RecordDAO.Record> pageRecords = fullRecords.subList(start, end);
         tableModel.setRecords(pageRecords);
+
+        // ページング後にフィルター適用
+        applyFilter();
     }
 
     private void saveChanges() {
@@ -213,6 +244,91 @@ public class EditRecordPanel extends JPanel {
         }
 
         loadData();
+    }
+
+    // フィルター適用
+    private void applyFilter() {
+        sorter.setRowFilter(new RowFilter<RecordTableModel, Integer>() {
+            @Override
+            public boolean include(Entry<? extends RecordTableModel, ? extends Integer> entry) {
+                RecordTableModel model = entry.getModel();
+                int modelRow = entry.getIdentifier();
+                if (modelRow < 0 || modelRow >= model.getRecords().size()) return false;
+                RecordDAO.Record record = model.getRecords().get(modelRow);
+
+                return visibleTypes.contains(record.getType()) &&
+                       visibleCategories.contains(record.getCategoryName());
+            }
+        });
+    }
+
+    // フィルター設定ダイアログ
+    private void openFilterDialog() {
+        JDialog dialog = new JDialog(mainFrame, "フィルター設定", true);
+        dialog.setLayout(new BorderLayout());
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
+
+        // タイプのチェックボックス
+        JPanel typePanel = new JPanel();
+        typePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("タイプ"));
+        JCheckBox incomeCheck = new JCheckBox("収入", visibleTypes.contains("収入"));
+        JCheckBox expenseCheck = new JCheckBox("支出", visibleTypes.contains("支出"));
+        typePanel.add(incomeCheck);
+        typePanel.add(expenseCheck);
+        panel.add(typePanel);
+
+        // カテゴリのチェックボックス（スクロール付き）
+        JPanel categoryPanel = new JPanel();
+        categoryPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("カテゴリ"));
+        categoryPanel.setLayout(new javax.swing.BoxLayout(categoryPanel, javax.swing.BoxLayout.Y_AXIS));
+
+        // すべてのカテゴリ名をリスト化
+        List<String> allCategories = new ArrayList<>();
+        allCategories.addAll(inCategoryMap.keySet());
+        allCategories.addAll(outCategoryMap.keySet());
+
+        Map<String, JCheckBox> categoryCheckMap = new HashMap<>();
+        for (String cat : allCategories) {
+            JCheckBox cb = new JCheckBox(cat, visibleCategories.contains(cat));
+            categoryCheckMap.put(cat, cb);
+            categoryPanel.add(cb);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(categoryPanel);
+        scrollPane.setPreferredSize(new java.awt.Dimension(200, 300));
+        panel.add(scrollPane);
+
+        dialog.add(panel, BorderLayout.CENTER);
+
+        // OK/キャンセルボタン
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton okButton = new JButton("OK");
+        JButton cancelButton = new JButton("キャンセル");
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        okButton.addActionListener(e -> {
+            visibleTypes.clear();
+            if (incomeCheck.isSelected()) visibleTypes.add("収入");
+            if (expenseCheck.isSelected()) visibleTypes.add("支出");
+
+            visibleCategories.clear();
+            for (Map.Entry<String, JCheckBox> entry : categoryCheckMap.entrySet()) {
+                if (entry.getValue().isSelected()) visibleCategories.add(entry.getKey());
+            }
+
+            applyFilter();
+            dialog.dispose();
+        });
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     // --- Table Model ---
@@ -288,7 +404,6 @@ public class EditRecordPanel extends JPanel {
                         }
                     } catch (IllegalArgumentException ex) {
                         JOptionPane.showMessageDialog(null, "日付は「yyyy-MM-dd」形式で入力してください。", "入力エラー", JOptionPane.ERROR_MESSAGE);
-                        // 必要なら元の値に戻す処理をここで行う
                         fireTableCellUpdated(row, col);
                     }
                 }

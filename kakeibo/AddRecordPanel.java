@@ -119,8 +119,8 @@ public class AddRecordPanel extends JPanel {
         try {
             date = LocalDate.parse(dateStr);
             LocalDate today = LocalDate.now();
-            if (date.isBefore(today.minusDays(30)) || date.isAfter(today.plusDays(30))) {
-                throw new IllegalArgumentException("日付は過去30日～未来30日の範囲で入力してください。");
+            if (date.isBefore(today.minusDays(3600)) || date.isAfter(today.plusDays(3600))) {
+                throw new IllegalArgumentException("日付は過去未来１０年の範囲で入力してください。");
             }
         } catch (DateTimeParseException ex) {
             throw new IllegalArgumentException("日付の形式が不正です。yyyy-MM-dd形式で入力してください。");
