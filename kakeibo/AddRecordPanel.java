@@ -71,7 +71,7 @@ public class AddRecordPanel extends JPanel {
 
         add(formPanel, BorderLayout.CENTER);
 
-        // イベント登録
+        // タイプ変更でカテゴリを再読み込み
         typeCombo.addActionListener(e -> {
             String selectedType = (String) typeCombo.getSelectedItem();
             loadCategoriesByType(selectedType);

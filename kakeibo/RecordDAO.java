@@ -121,6 +121,27 @@ public class RecordDAO {
             return false;
         }
     }
+    
+    public static boolean updateRecordWithDate(Record record) {
+        String sql = "UPDATE Record SET Date = ?, CategoryId = ?, Type = ?, Amount = ?, Memo = ? WHERE RecordId = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, record.getDate());
+            stmt.setInt(2, record.getCategoryId());
+            stmt.setString(3, record.getType());
+            stmt.setInt(4, record.getAmount());
+            stmt.setString(5, record.getMemo());
+            stmt.setInt(6, record.getRecordId());
+
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     // レコード削除
     public boolean deleteRecordBySession(String sessionId, int recordId) {
