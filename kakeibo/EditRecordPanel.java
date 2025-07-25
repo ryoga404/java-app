@@ -431,7 +431,7 @@ public class EditRecordPanel extends JPanel {
         @Override
         public boolean isCellEditable(int row, int col) {
             // 0列（選択列）以外は編集可能に（日付も含む）
-            return col != 0;
+            return true;
         }
 
         @Override
