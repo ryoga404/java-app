@@ -5,12 +5,21 @@ GitBash（Windowsボタン（スタートメニュー）よりGitBash）
  git remote set-url origin git@github.com:ryoga404/java-app.git
  git pull origin main
 
-　ーーーーーーーーーー
-　作業前・Git push前はgit pull origin mainでローカル環境にリモート（Git上）の他の人の変更を反映させる！！！！
-　ーーーーーーーーーー
-　グループ作成・参加は修正済み（DB内にテーブルがあれば動作する）
-　　・グループ関連のレイアウトを修正
-　　・同じグループごとの帳簿集計パネル（EditRecordパネルっぽい画面）
-　　
-　・他レイアウト修正
-　・背景どうするか（アプリトップはWindows Vistaデフォルト背景）
+---------------------
+アップロード時
+git add 編集したパス
+git commit -m "メッセージを入力"
+git push origin main
+--------------------
+
+0728
+　・インポート／エクスポート画面（詳細は別ファイル）
+　・グループ管理パネル
+　・グラフ可視化パネル
+　
+0729
+　・DB試験勉強
+　
+0730
+　・各パネル／機能の最終調整（バグ修正等）
+　・EXE実行ファイル化
