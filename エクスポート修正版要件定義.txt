@@ -32,7 +32,7 @@ Date,CategoryType,CategoryName,Amount,Memo
 
 ■ファイル形式
 ・文字コード：UTF-8
-・ファイル拡張子：.csv（ただし .txt でも可）
+・ファイル拡張子：.csv
 
 ■補足
 ・このCSVはインポート機能でそのまま利用できる形式で出力すること
