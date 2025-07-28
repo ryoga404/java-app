@@ -9,7 +9,10 @@ import java.awt.Insets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -31,7 +34,7 @@ public class GroupCreatePanel extends JPanel {
 
     private GroupDAO groupDAO = new GroupDAO();
 
-    private Map<String, java.util.List<BudgetRecord>> groupData = new HashMap<>();
+    private Map<String, List<BudgetRecord>> groupData = new HashMap<>();
     private DefaultListModel<String> groupListModel = new DefaultListModel<>();
     private JList<String> groupList = new JList<>(groupListModel);
 
@@ -43,6 +46,7 @@ public class GroupCreatePanel extends JPanel {
 
     private JComboBox<String> typeCombo;       // 支出・収入
     private JComboBox<String> categoryCombo;   // カテゴリー
+    private JComboBox<String> memberCombo;     // メンバー選択用コンボボックス
 
     private String currentGroup = null;
 
@@ -97,6 +101,7 @@ public class GroupCreatePanel extends JPanel {
                 String selected = groupList.getSelectedValue();
                 currentGroup = selected;
                 loadGroupRecords(selected);
+                updateMemberCombo();  // メンバーコンボ更新
             }
         });
 
@@ -167,7 +172,25 @@ public class GroupCreatePanel extends JPanel {
         tableScroll.setBorder(BorderFactory.createLineBorder(primaryColor, 2));
         centerPanel.add(tableScroll, BorderLayout.CENTER);
 
-        centerPanel.add(createInputPanel(primaryColor, normalFont), BorderLayout.SOUTH);
+        // メンバー選択コンボボックスの作成と配置
+        memberCombo = new JComboBox<>();
+        memberCombo.addItem("すべてのメンバー");
+        memberCombo.setFont(normalFont);
+        memberCombo.addActionListener(e -> filterByMember());
+
+        JPanel memberPanel = new JPanel(new BorderLayout());
+        memberPanel.setBackground(secondaryColor);
+        memberPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+        memberPanel.add(new JLabel("メンバー選択:"), BorderLayout.WEST);
+        memberPanel.add(memberCombo, BorderLayout.CENTER);
+
+        // 入力パネルは一番下に置くため別に配置
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.setBackground(secondaryColor);
+        southPanel.add(memberPanel, BorderLayout.NORTH);
+        southPanel.add(createInputPanel(primaryColor, normalFont), BorderLayout.SOUTH);
+
+        centerPanel.add(southPanel, BorderLayout.SOUTH);
 
         add(centerPanel, BorderLayout.CENTER);
     }
@@ -257,11 +280,12 @@ public class GroupCreatePanel extends JPanel {
         amountField.setEnabled(enabled);
         memoField.setEnabled(enabled);
         addRecordBtn.setEnabled(enabled);
+        memberCombo.setEnabled(enabled);
     }
 
     private void loadGroupRecords(String groupName) {
         tableModel.setRowCount(0);
-        java.util.List<BudgetRecord> records = groupData.get(groupName);
+        List<BudgetRecord> records = groupData.get(groupName);
         if (records != null) {
             for (BudgetRecord r : records) {
                 String typeCategory = r.type + " / " + r.category;
@@ -271,6 +295,8 @@ public class GroupCreatePanel extends JPanel {
         } else {
             setInputEnabled(false);
         }
+        updateMemberCombo();
+        memberCombo.setSelectedIndex(0);  // 「すべてのメンバー」選択状態に
     }
 
     private void updateGroupListDisplay() {
@@ -280,8 +306,43 @@ public class GroupCreatePanel extends JPanel {
         }
     }
 
-    private void addRecord() {
+    private void updateMemberCombo() {
+        memberCombo.removeAllItems();
+        memberCombo.addItem("すべてのメンバー");
+        if (currentGroup == null) return;
+        List<BudgetRecord> records = groupData.get(currentGroup);
+        if (records == null) return;
 
+        // ユニークなユーザー名を収集して昇順でソート
+        Set<String> users = new TreeSet<>();
+        for (BudgetRecord r : records) {
+            users.add(r.user);
+        }
+        for (String user : users) {
+            memberCombo.addItem(user);
+        }
+    }
+
+    private void filterByMember() {
+        if (currentGroup == null) return;
+
+        String selectedMember = (String) memberCombo.getSelectedItem();
+        if (selectedMember == null) return;
+
+        List<BudgetRecord> allRecords = groupData.get(currentGroup);
+        if (allRecords == null) return;
+
+        tableModel.setRowCount(0);
+
+        for (BudgetRecord r : allRecords) {
+            if ("すべてのメンバー".equals(selectedMember) || r.user.equals(selectedMember)) {
+                String typeCategory = r.type + " / " + r.category;
+                tableModel.addRow(new Object[]{false, r.user, typeCategory, r.amount, r.date, r.memo});
+            }
+        }
+    }
+
+    private void addRecord() {
         if (currentGroup == null) {
             JOptionPane.showMessageDialog(this, "グループを選択してください。");
             return;
@@ -305,14 +366,21 @@ public class GroupCreatePanel extends JPanel {
         String today = LocalDate.now().toString();
 
         BudgetRecord r = new BudgetRecord(user, type, category, amount, today, memo);
+
+        if (!groupDAO.saveBudgetRecord(currentGroup, r)) {
+            JOptionPane.showMessageDialog(this, "データベースへの保存に失敗しました。");
+            return;
+        }
+
         groupData.computeIfAbsent(currentGroup, k -> new ArrayList<>()).add(r);
 
-        tableModel.addRow(new Object[]{false, user, type + " / " + category, amount, r.date, memo});
+        // 追加後は現在のメンバー選択に合わせて再表示
+        filterByMember();
 
         amountField.setText("");
         memoField.setText("");
+        updateMemberCombo();  // 新規ユーザー追加時のため更新
     }
-
     private void createGroup() {
         String groupName = JOptionPane.showInputDialog(this, "新しいグループ名を入力してください。");
         if (groupName == null || groupName.trim().isEmpty()) return;
@@ -335,44 +403,58 @@ public class GroupCreatePanel extends JPanel {
 
     private void deleteSelectedRecords() {
         int rowCount = tableModel.getRowCount();
-        java.util.List<Integer> rowsToDelete = new ArrayList<>();
+        List<Integer> rowsToDelete = new ArrayList<>();
 
-        // 選択されたチェックボックスの行を収集
-        for (int i = rowCount - 1; i >= 0; i--) {
+        for (int i = 0; i < rowCount; i++) {
             Boolean checked = (Boolean) tableModel.getValueAt(i, 0);
             if (checked != null && checked) {
                 rowsToDelete.add(i);
             }
         }
-
         if (rowsToDelete.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "削除する項目が選択されていません。");
+            JOptionPane.showMessageDialog(this, "削除する行をチェックしてください。");
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(this, "選択した項目を削除しますか？", "確認", JOptionPane.YES_NO_OPTION);
-        if (confirm != JOptionPane.YES_OPTION) return;
+        List<BudgetRecord> records = groupData.get(currentGroup);
+        if (records == null) return;
 
-        // 行番号が大きい順に削除（テーブルとデータの整合性維持のため）
-        for (int row : rowsToDelete) {
-            tableModel.removeRow(row);
-            java.util.List<BudgetRecord> records = groupData.get(currentGroup);
-            if (records != null && row < records.size()) {
-                records.remove(row);
+        rowsToDelete.sort((a, b) -> b - a);
+        for (int rowIndex : rowsToDelete) {
+            String user = (String) tableModel.getValueAt(rowIndex, 1);
+            String typeCategory = (String) tableModel.getValueAt(rowIndex, 2);
+            int slashPos = typeCategory.indexOf(" / ");
+            String type = typeCategory.substring(0, slashPos);
+            String category = typeCategory.substring(slashPos + 3);
+            String amountStr = (String) tableModel.getValueAt(rowIndex, 3);
+            int amount = Integer.parseInt(amountStr);
+            String date = (String) tableModel.getValueAt(rowIndex, 4);
+            String memo = (String) tableModel.getValueAt(rowIndex, 5);
+
+            BudgetRecord r = new BudgetRecord(user, type, category, amount, date, memo);
+
+            if (!groupDAO.deleteBudgetRecord(currentGroup, r)) {
+                JOptionPane.showMessageDialog(this, "データベースからの削除に失敗しました。");
+                continue;
             }
+
+            records.removeIf(record -> record.user.equals(user) && record.type.equals(type) && record.category.equals(category)
+                    && record.amount == amount && record.date.equals(date) && record.memo.equals(memo));
+            tableModel.removeRow(rowIndex);
         }
+        updateMemberCombo();
+        filterByMember();
     }
+    // BudgetRecordクラス
+    private static class BudgetRecord {
+        String user;
+        String type;
+        String category;
+        int amount;
+        String date;
+        String memo;
 
-    // BudgetRecord クラス
-    public static class BudgetRecord {
-        public String user;
-        public String type;      // 支出・収入
-        public String category;
-        public int amount;
-        public String date;
-        public String memo;
-
-        public BudgetRecord(String user, String type, String category, int amount, String date, String memo) {
+        BudgetRecord(String user, String type, String category, int amount, String date, String memo) {
             this.user = user;
             this.type = type;
             this.category = category;
@@ -381,4 +463,28 @@ public class GroupCreatePanel extends JPanel {
             this.memo = memo;
         }
     }
+
+    // ダミーDAO（本物のDB連携に置き換えてください）
+    private static class GroupDAO {
+        public boolean createGroup(String groupName) {
+            // グループ作成処理（ダミー）
+            return true;
+        }
+
+        public boolean deleteBudgetRecord(String currentGroup, GroupCreatePanel.BudgetRecord r) {
+			// TODO 自動生成されたメソッド・スタブ
+			return false;
+		}
+
+		public boolean saveBudgetRecord(String currentGroup, GroupCreatePanel.BudgetRecord r) {
+			// TODO 自動生成されたメソッド・スタブ
+			return false;
+		}
+
+		public boolean joinGroup(String loginId, String groupName) {
+            // グループ参加処理（ダミー）
+            return true;
+        }
+    }
+
 }
