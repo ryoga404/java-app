@@ -77,7 +77,8 @@ public class HomePanel extends JPanel {
             {"🗓データ抽出（カレンダー）", "calendar"},
             {"📁インポート / エクスポート", "importexport"},
             {"👥グループ管理", "createGroup"},
-            {"🔗グループ参加", "joinGroup"}
+            {"🔗グループ参加", "joinGroup"},
+            {"📊グラフ表示", "graph"}  // ← ここに追加
         };
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 12);
@@ -114,6 +115,7 @@ public class HomePanel extends JPanel {
         views.put("group", createPage("グループ管理画面です。"));
         views.put("createGroup", new GroupCreatePanel(mainFrame));
         views.put("joinGroup", new JoinGroupPanel(mainFrame));
+        views.put("graph", new GraphPanel());  // ここでGraphPanelを登録
 
         for (JPanel panel : views.values()) {
             panel.setVisible(false);
