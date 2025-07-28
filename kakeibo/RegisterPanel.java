@@ -122,9 +122,8 @@ public class RegisterPanel extends JPanel implements ActionListener {
         JLabel passConditionLabel = new JLabel("<html><i>※パスワードは8文字以上、大文字・小文字・数字・特殊文字を含む。特殊文字は (!#@_ )</i></html>");
         passConditionLabel.setFont(new Font("Meiryo", Font.PLAIN, 17));
         passConditionLabel.setForeground(Color.DARK_GRAY);
-        passConditionLabel.setAlignmentX(CENTER_ALIGNMENT);
-        passConditionLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-
+        passConditionLabel.setAlignmentX(LEFT_ALIGNMENT);
+        
         add(titleLabel);
         add(Box.createRigidArea(new Dimension(0, 15)));
 
@@ -133,6 +132,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
         add(Box.createRigidArea(new Dimension(0, 15)));
 
         add(passLabel);
+        add(passConditionLabel);
         add(pass);
         add(Box.createRigidArea(new Dimension(0, 15)));
 
@@ -146,7 +146,7 @@ public class RegisterPanel extends JPanel implements ActionListener {
 
         // 下にスペースを作ってパスワード条件を配置
         add(Box.createVerticalGlue());
-        add(passConditionLabel);
+        
     }
 
     @Override
