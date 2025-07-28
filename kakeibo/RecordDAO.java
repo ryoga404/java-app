@@ -198,6 +198,18 @@ public class RecordDAO {
 
     // Record DTOクラス
     public static class Record {
+    	
+    	private String userName;
+
+    	public String getUserName() { return userName; }
+    	public void setUserName(String userName) { this.userName = userName; }
+
+    	
+    	private String userId;
+
+    	public String getUserId() { return userId; }
+    	public void setUserId(String userId) { this.userId = userId; }
+
         private int recordId;
         private Date date;
         private int categoryId;

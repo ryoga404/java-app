@@ -16,7 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements GroupCreatePanel.MainFrame {
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
@@ -57,12 +57,13 @@ public class MainFrame extends JFrame {
         return sessionId;
     }
 
-    public void setCurrentUserId(String userId) {
-        this.currentUserId = userId;
-    }
-
+    @Override
     public String getCurrentUserId() {
         return currentUserId;
+    }
+
+    public void setCurrentUserId(String userId) {
+        this.currentUserId = userId;
     }
 
     private void addPanel(String name, JPanel panel) {
@@ -98,7 +99,7 @@ public class MainFrame extends JFrame {
             if (homePanel != null) {
                 String groupName = "";
                 if (currentUserId != null) {
-                    groupName = groupDAO.getGroupNameByUserId(currentUserId);
+                    //groupName = groupDAO.getGroupNameByUserId(currentUserId);
                     if (groupName == null || groupName.isEmpty()) {
                         groupName = "グループなし";
                     }
