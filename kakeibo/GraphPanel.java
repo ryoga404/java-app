@@ -21,7 +21,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtils;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
 
@@ -170,7 +170,8 @@ public class GraphPanel extends JFrame {
             }
 
             try {
-                ChartUtils.saveChartAsPNG(file, chartPanel.getChart(), chartPanel.getWidth(), chartPanel.getHeight());
+                // JFreeChart 1.0.19 では ChartUtilities を使用
+                ChartUtilities.saveChartAsPNG(file, chartPanel.getChart(), chartPanel.getWidth(), chartPanel.getHeight());
                 JOptionPane.showMessageDialog(this, "PNG画像を保存しました:\n" + file.getAbsolutePath());
             } catch (IOException ex) {
                 ex.printStackTrace();
