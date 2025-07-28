@@ -13,7 +13,7 @@ public class RecordDAO {
     // セッションIDからユーザーIDを取得しつつ有効性チェック
     private String getUserIdBySession(String sessionId) {
         if (sessionId == null || !sessionDAO.isSessionValid(sessionId)) {
-            System.out.println("セッションが無効またはnullです。");
+            //System.out.println("セッションが無効またはnullです。");
             return null;
         }
         return sessionDAO.getUserIdBySession(sessionId);

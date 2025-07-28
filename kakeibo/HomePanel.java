@@ -120,7 +120,7 @@ public class HomePanel extends JPanel {
         views.put("group", createPage("グループ管理画面です。"));
         views.put("createGroup", new GroupCreatePanel(mainFrame));
         views.put("joinGroup", new JoinGroupPanel(mainFrame));
-        //views.put("graph", new GraphPanel());  // ここでGraphPanelを登録
+        views.put("graph", new GraphPanel(mainFrame));  // ここでGraphPanelを登録
 
         for (JPanel panel : views.values()) {
             panel.setVisible(false);

@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -24,7 +23,7 @@ import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
 
-public class GraphPanel extends JFrame {
+public class GraphPanel extends JPanel {
     private final JComboBox<Integer> yearCombo = new JComboBox<>();
     private final JComboBox<Integer> monthCombo = new JComboBox<>();
     private final JButton refreshButton = new JButton("グラフ更新");
@@ -39,11 +38,12 @@ public class GraphPanel extends JFrame {
 
     // 現在表示中のデータセット（エクスポート用）
     private DefaultPieDataset currentDataset;
+	private MainFrame mainFrame;
 
     public GraphPanel() {
-        setTitle("家計簿円グラフ");
+
         setSize(800, 600);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
         setLayout(new BorderLayout());
 
         // 年月選択パネル
@@ -73,7 +73,12 @@ public class GraphPanel extends JFrame {
         updateChart();
     }
 
-    private void initDateSelectors() {
+    public GraphPanel(MainFrame mainFrame) {
+		this.mainFrame = mainFrame;
+		this.chartPanel = null;
+	}
+
+	private void initDateSelectors() {
         int currentYear = LocalDate.now().getYear();
         for (int y = currentYear - 5; y <= currentYear + 1; y++) {
             yearCombo.addItem(y);
