@@ -1,4 +1,3 @@
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -127,7 +126,7 @@ public class MainFrame extends JFrame {
 
     private void playBackgroundMusic() {
         try {
-            InputStream audioSrc = getClass().getResourceAsStream("resources/music.wav");
+            InputStream audioSrc = getClass().getResourceAsStream("/resources/music.wav");
             if (audioSrc == null) {
                 System.err.println("music.wav が見つかりません。");
                 return;

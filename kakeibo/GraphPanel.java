@@ -16,7 +16,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartFactory;
@@ -211,13 +210,5 @@ public class GraphPanel extends JFrame {
                 JOptionPane.showMessageDialog(this, "CSV保存に失敗しました:\n" + ex.getMessage());
             }
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            GraphPanel app = new GraphPanel();
-            app.setLocationRelativeTo(null); // 画面中央に表示
-            app.setVisible(true);
-        });
     }
 }
