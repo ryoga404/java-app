@@ -1,18 +1,30 @@
 import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
-public class GroupDAO {
+private static class GroupDAO {
+    private static final String URL = "jdbc:mysql://localhost:3306/kakeibo";
+    private static final String USER = "your_db_user";
+    private static final String PASS = "your_db_password";
 
-    // グループを作成
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASS);
+    }
+
     public boolean createGroup(String groupName) {
-        try (Connection conn = DBUtil.getConnection()) {
-            String sql = "INSERT INTO grouptable (GroupName) VALUES (?)";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, groupName);
-                stmt.executeUpdate();
-            }
+        // グループテーブルがあればINSERTする想定
+        // 例: groupsテーブルにgroupNameがなければ登録する
+        String sql = "INSERT INTO groups (group_name) VALUES (?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, groupName);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            // すでにある場合はOKとする
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -20,14 +32,18 @@ public class GroupDAO {
         }
     }
 
-    // グループを削除
-    public boolean deleteGroup(String groupName) {
-        try (Connection conn = DBUtil.getConnection()) {
-            String sql = "DELETE FROM grouptable WHERE GroupName = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, groupName);
-                stmt.executeUpdate();
-            }
+    public boolean saveBudgetRecord(String currentGroup, BudgetRecord r) {
+        String sql = "INSERT INTO kakeibo (group_name, user, type, category, amount, date, memo) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, currentGroup);
+            ps.setString(2, r.user);
+            ps.setString(3, r.type);
+            ps.setString(4, r.category);
+            ps.setInt(5, r.amount);
+            ps.setDate(6, Date.valueOf(r.date));
+            ps.setString(7, r.memo);
+            ps.executeUpdate();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -35,85 +51,41 @@ public class GroupDAO {
         }
     }
 
-    // グループに参加
-    public boolean joinGroup(String userId, String groupName) {
-        try (Connection conn = DBUtil.getConnection()) {
-            String groupId = getGroupId(groupName);
-            if (groupId == null) {
-                return false; // グループが存在しない
-            }
-
-            String sql = "INSERT INTO groupmember (GroupId, UserId) VALUES (?, ?)";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, groupId);
-                stmt.setString(2, userId);
-                stmt.executeUpdate();
-            }
-
-            return true;
+    public boolean deleteBudgetRecord(String currentGroup, BudgetRecord r) {
+        // idがない場合は複数条件で該当レコードを特定して削除（複数マッチの可能性あり）
+        String sql = "DELETE FROM kakeibo WHERE group_name = ? AND user = ? AND type = ? AND category = ? AND amount = ? AND date = ? AND memo = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, currentGroup);
+            ps.setString(2, r.user);
+            ps.setString(3, r.type);
+            ps.setString(4, r.category);
+            ps.setInt(5, r.amount);
+            ps.setDate(6, Date.valueOf(r.date));
+            ps.setString(7, r.memo);
+            int affected = ps.executeUpdate();
+            return affected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    // グループから脱退
-    public boolean leaveGroup(String userId, String groupName) {
-        try (Connection conn = DBUtil.getConnection()) {
-            String groupId = getGroupId(groupName);
-            if (groupId == null) {
-                return false; // グループが存在しない
-            }
-
-            String sql = "DELETE FROM groupmember WHERE GroupId = ? AND UserId = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, groupId);
-                stmt.setString(2, userId);
-                stmt.executeUpdate();
-            }
-
+    public boolean joinGroup(String loginId, String groupName) {
+        // 参加メンバー管理テーブルがあればINSERTする想定
+        String sql = "INSERT INTO group_members (group_name, user) VALUES (?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, groupName);
+            ps.setString(2, loginId);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            // すでに参加済みの場合OKとする
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-    }
-
-    // グループIDを取得
-    public String getGroupId(String groupName) {
-        try (Connection conn = DBUtil.getConnection()) {
-            String sql = "SELECT GroupId FROM grouptable WHERE GroupName = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, groupName);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getString("GroupId");
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // ←★追加：ユーザーIDから所属しているグループ名を取得
-    public String getGroupNameByUserId(String userId) {
-        try (Connection conn = DBUtil.getConnection()) {
-            String sql = "SELECT g.GroupName FROM grouptable g " +
-                         "JOIN groupmember gm ON g.GroupId = gm.GroupId " +
-                         "WHERE gm.UserId = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, userId);
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getString("GroupName");
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }
