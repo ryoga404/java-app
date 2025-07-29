@@ -16,7 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements GroupCreatePanel.MainFrame {
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
@@ -57,12 +57,13 @@ public class MainFrame extends JFrame {
         return sessionId;
     }
 
-    public void setCurrentUserId(String userId) {
-        this.currentUserId = userId;
-    }
-
+    @Override
     public String getCurrentUserId() {
         return currentUserId;
+    }
+
+    public void setCurrentUserId(String userId) {
+        this.currentUserId = userId;
     }
 
     private void addPanel(String name, JPanel panel) {
@@ -76,16 +77,16 @@ public class MainFrame extends JFrame {
     }
 
     public void showPanel(String name) {
-        System.out.println("showPanel called with: " + name);
+        //System.out.println("showPanel called with: " + name);
         SessionDAO sessionDAO = new SessionDAO();
         boolean validSession = (sessionId != null) && sessionDAO.isSessionValid(sessionId);
-        System.out.println("sessionId: " + sessionId + ", validSession: " + validSession);
+        //System.out.println("sessionId: " + sessionId + ", validSession: " + validSession);
 
         if ((name.equals("login") || name.equals("register")) && validSession) {
-            System.out.println("Valid session exists. Redirecting to home.");
+            //System.out.println("Valid session exists. Redirecting to home.");
             name = "home";
         } else if (!name.equals("top") && !validSession && !(name.equals("login") || name.equals("register"))) {
-            System.out.println("Invalid session. Redirecting to top.");
+            //System.out.println("Invalid session. Redirecting to top.");
             JOptionPane.showMessageDialog(this, "セッションが無効です。再ログインしてください。");
             sessionId = null;
             currentUserId = null;
@@ -98,7 +99,7 @@ public class MainFrame extends JFrame {
             if (homePanel != null) {
                 String groupName = "";
                 if (currentUserId != null) {
-                    groupName = groupDAO.getGroupNameByUserId(currentUserId);
+                    //groupName = groupDAO.getGroupNameByUserId(currentUserId);
                     if (groupName == null || groupName.isEmpty()) {
                         groupName = "グループなし";
                     }

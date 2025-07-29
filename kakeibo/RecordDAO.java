@@ -13,7 +13,7 @@ public class RecordDAO {
     // セッションIDからユーザーIDを取得しつつ有効性チェック
     private String getUserIdBySession(String sessionId) {
         if (sessionId == null || !sessionDAO.isSessionValid(sessionId)) {
-            System.out.println("セッションが無効またはnullです。");
+            //System.out.println("セッションが無効またはnullです。");
             return null;
         }
         return sessionDAO.getUserIdBySession(sessionId);
@@ -198,6 +198,18 @@ public class RecordDAO {
 
     // Record DTOクラス
     public static class Record {
+    	
+    	private String userName;
+
+    	public String getUserName() { return userName; }
+    	public void setUserName(String userName) { this.userName = userName; }
+
+    	
+    	private String userId;
+
+    	public String getUserId() { return userId; }
+    	public void setUserId(String userId) { this.userId = userId; }
+
         private int recordId;
         private Date date;
         private int categoryId;

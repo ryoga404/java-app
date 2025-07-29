@@ -175,7 +175,7 @@ public class EditRecordPanel extends JPanel {
 
     public void refreshUserInfo() {
         String userId = mainFrame.getCurrentUserId();
-        System.out.println("EditRecordPanel.refreshUserInfo() called. Current user: " + userId);
+        //System.out.println("EditRecordPanel.refreshUserInfo() called. Current user: " + userId);
     }
 
     public void loadData() {
