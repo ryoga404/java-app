@@ -195,7 +195,7 @@ public class AddRecordPanel extends JPanel {
 
         boolean success = recordDAO.addRecord(sessionId, java.sql.Date.valueOf(date), categoryId, type, amount, memo);
         if (success) {
-            AutoCloseDialog.showAutoCloseMessage(SwingUtilities.getWindowAncestor(this), "登録成功！", 1000);
+            AutoCloseDialog.showAutoCloseMessage(SwingUtilities.getWindowAncestor(this), "登録成功！", 500);
             clearFields();
         } else {
             JOptionPane.showMessageDialog(this, "登録に失敗しました。", "エラー", JOptionPane.ERROR_MESSAGE);

@@ -26,7 +26,7 @@ public class MainFrame extends JFrame implements GroupCreatePanel.MainFrame {
     private Set<String> addedPanels = new HashSet<>();
     private Map<String, JPanel> panels = new HashMap<>();
 
-    private GroupDAO groupDAO = new GroupDAO();
+    //private GroupDAO groupDAO = new GroupDAO();
 
     private Clip musicClip;
 
