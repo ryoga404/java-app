@@ -77,7 +77,7 @@ public class HomePanel extends JPanel {
         	    {"📋データ登録", "addRecord"},
         	    {"✏️編集", "editRecord"},
         	    //{"🗓データ抽出（カレンダー）", "calendar"},
-        	    //{"📁インポート / エクスポート", "importexport"},
+        	    {"📁インポート / エクスポート", "importexport"},
         	    {"👥グループ管理", "group"},  // ← ここを group に変える
         	    {"🔗グループ参加", "joinGroup"},
         	    {"📊グラフ表示", "graph"}
