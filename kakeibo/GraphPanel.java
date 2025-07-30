@@ -10,18 +10,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
@@ -31,15 +34,25 @@ public class GraphPanel extends JPanel {
     private final JButton refreshButton = new JButton("グラフ更新");
     private final JButton exportPNGButton = new JButton("PNG保存");
     private final JButton exportCSVButton = new JButton("CSV保存");
+
+    private final JToggleButton outToggle = new JToggleButton("支出");
+    private final JToggleButton inToggle = new JToggleButton("収入");
+
     private ChartPanel chartPanel;
 
-    private String userId; // ログイン済みユーザーIDを格納
+    private String userId; // ログイン済みユーザーID
     private DefaultPieDataset currentDataset;
     private MainFrame mainFrame;
 
+    private String selectedCategoryType = "OUT"; // 初期は支出
+
+    private JLabel totalAmountLabel = new JLabel("合計: 0 円");
+    private JPanel controlPanel = new JPanel();
+    private JPanel totalPanel = new JPanel();
+
     public GraphPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        this.userId = mainFrame.getCurrentUserId(); // ログイン済みユーザID取得
+        this.userId = mainFrame.getCurrentUserId(); // ログイン済みユーザーID取得
         initialize();
     }
 
@@ -47,24 +60,53 @@ public class GraphPanel extends JPanel {
         setLayout(new BorderLayout());
         setSize(800, 600);
 
-        JPanel topPanel = new JPanel();
-        topPanel.add(new JLabel("年："));
-        topPanel.add(yearCombo);
-        topPanel.add(new JLabel("月："));
-        topPanel.add(monthCombo);
-        topPanel.add(refreshButton);
-        topPanel.add(exportPNGButton);
-        topPanel.add(exportCSVButton);
-        add(topPanel, BorderLayout.NORTH);
+        // 操作パネル（年・月・トグル・ボタン類）
+        controlPanel.add(new JLabel("年："));
+        controlPanel.add(yearCombo);
+        controlPanel.add(new JLabel("月："));
+        controlPanel.add(monthCombo);
 
-        initDateSelectors();
+        ButtonGroup toggleGroup = new ButtonGroup();
+        toggleGroup.add(outToggle);
+        toggleGroup.add(inToggle);
+        outToggle.setSelected(true);
 
+        controlPanel.add(outToggle);
+        controlPanel.add(inToggle);
+
+        controlPanel.add(refreshButton);
+        controlPanel.add(exportPNGButton);
+        controlPanel.add(exportCSVButton);
+
+        add(controlPanel, BorderLayout.NORTH);
+
+        // グラフパネル中央
         chartPanel = new ChartPanel(null);
         add(chartPanel, BorderLayout.CENTER);
 
+        // 合計金額ラベル用パネル
+        totalAmountLabel.setFont(new Font("Meiryo", Font.BOLD, 16));
+        totalAmountLabel.setHorizontalAlignment(JLabel.CENTER);
+        totalAmountLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 10, 10, 10));
+        totalPanel.setLayout(new BorderLayout());
+        totalPanel.add(totalAmountLabel, BorderLayout.CENTER);
+        add(totalPanel, BorderLayout.SOUTH);
+
+        initDateSelectors();
+
+        // ボタンリスナー登録
         refreshButton.addActionListener(e -> updateChart());
         exportPNGButton.addActionListener(e -> exportChartAsPNG());
         exportCSVButton.addActionListener(e -> exportDataAsCSV());
+
+        outToggle.addActionListener(e -> {
+            selectedCategoryType = "OUT";
+            updateChart();
+        });
+        inToggle.addActionListener(e -> {
+            selectedCategoryType = "IN";
+            updateChart();
+        });
 
         updateChart();
     }
@@ -90,7 +132,7 @@ public class GraphPanel extends JPanel {
         return (int) monthCombo.getSelectedItem();
     }
 
-    private void updateChart() {
+    public void updateChart() {
         int year = getSelectedYear();
         int month = getSelectedMonth();
         JFreeChart chart = createChart(year, month);
@@ -103,12 +145,13 @@ public class GraphPanel extends JPanel {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.plusMonths(1);
 
-        // SQL文：テーブル名とカラム名をバッククォートで囲むことで大文字小文字や予約語を回避
         String sqlUser =
-            "SELECT c.`CategoryName`, SUM(r.`Amount`) AS Total " +
-            "FROM `Record` r JOIN `Category` c ON r.`CategoryId` = c.`CategoryId` " +
-            "WHERE r.`UserId` = ? AND r.`Date` >= ? AND r.`Date` < ? AND c.`CategoryType` = 'OUT' " +
-            "GROUP BY c.`CategoryName`";
+            "SELECT c.CategoryName, SUM(r.Amount) AS Total " +
+            "FROM Record r JOIN Category c ON r.CategoryId = c.CategoryId " +
+            "WHERE r.UserId = ? AND r.Date >= ? AND r.Date < ? AND c.CategoryType = ? " +
+            "GROUP BY c.CategoryName";
+
+        int sumTotal = 0;
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sqlUser)) {
@@ -116,12 +159,19 @@ public class GraphPanel extends JPanel {
             stmt.setString(1, userId);
             stmt.setDate(2, Date.valueOf(startDate));
             stmt.setDate(3, Date.valueOf(endDate));
+            stmt.setString(4, selectedCategoryType);
 
             try (ResultSet rs = stmt.executeQuery()) {
+                boolean hasData = false;
                 while (rs.next()) {
                     String category = rs.getString("CategoryName");
                     int total = rs.getInt("Total");
                     currentDataset.setValue(category, total);
+                    sumTotal += total;
+                    hasData = true;
+                }
+                if (!hasData) {
+                    currentDataset.setValue("データなし", 1);
                 }
             }
         } catch (SQLException e) {
@@ -129,7 +179,11 @@ public class GraphPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "データ取得エラー: " + e.getMessage());
         }
 
-        String title = String.format("%d年%d月の支出カテゴリ別円グラフ", year, month);
+        totalAmountLabel.setText(String.format("合計: %,d 円", sumTotal));
+
+        String title = String.format("%d年%d月の%sカテゴリ別円グラフ",
+                year, month, selectedCategoryType.equals("OUT") ? "支出" : "収入");
+
         JFreeChart chart = ChartFactory.createPieChart(title, currentDataset, true, true, false);
 
         Font jpFont = new Font("Meiryo", Font.PLAIN, 14);
@@ -140,6 +194,9 @@ public class GraphPanel extends JPanel {
         if (chart.getPlot() instanceof PiePlot) {
             PiePlot plot = (PiePlot) chart.getPlot();
             plot.setLabelFont(jpFont);
+
+            plot.setLabelGenerator(new StandardPieSectionLabelGenerator(
+                "{0} ({1} 円)", java.text.NumberFormat.getNumberInstance(), java.text.NumberFormat.getNumberInstance()));
         }
 
         return chart;
@@ -203,5 +260,9 @@ public class GraphPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "CSV保存に失敗しました:\n" + ex.getMessage());
             }
         }
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
