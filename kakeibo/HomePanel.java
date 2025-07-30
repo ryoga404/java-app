@@ -116,7 +116,7 @@ public class HomePanel extends JPanel {
         views.put("addRecord", new AddRecordPanel(mainFrame));
         views.put("editRecord", new EditRecordPanel(mainFrame));
         views.put("calendar", createPage("カレンダー画面です。"));
-        views.put("importexport", createPage("インポート / エクスポート画面です。"));
+        views.put("importexport", new ImportExportPanel(mainFrame));
         views.put("group", createPage("グループ管理画面です。"));
         views.put("createGroup", new GroupCreatePanel(mainFrame));
         views.put("joinGroup", new JoinGroupPanel(mainFrame));
