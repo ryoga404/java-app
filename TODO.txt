@@ -25,5 +25,13 @@ git push origin main
 　　　・編集あるいは追加したあとにパネルに移動したら変更されるように（デバッグ時確認）
 　
 0730
+  ・グラフパネルおよびグループ関連パネルは途中まででOK
+　・SQLファイル適用
+　　Win+R
+    cmd
+    cd C:\xampp\mysql\bin
+    mysql -u root -p
+    MySQLに入った状態でC:¥Users¥mid¥Desktop¥java-app¥Update.sqlの中身をコピペ
+
 　・各パネル／機能の最終調整（バグ修正等）
 　・EXE実行ファイル化
