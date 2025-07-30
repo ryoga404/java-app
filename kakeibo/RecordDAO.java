@@ -9,6 +9,10 @@ import java.util.List;
 public class RecordDAO {
 
     private SessionDAO sessionDAO = new SessionDAO();
+    
+    public String getUserId(String sessionId) {
+        return getUserIdBySession(sessionId);  // private メソッドを呼び出す
+    }
 
     // セッションIDからユーザーIDを取得しつつ有効性チェック
     private String getUserIdBySession(String sessionId) {
