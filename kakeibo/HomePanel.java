@@ -45,6 +45,7 @@ public class HomePanel extends JPanel {
             System.err.println("背景画像が見つかりません: " + e.getMessage());
             backgroundImage = null;
         }
+        
 
         // --- ヘッダー ---
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
@@ -72,14 +73,15 @@ public class HomePanel extends JPanel {
         menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
         String[][] menuItems = {
-            {"📋データ登録", "addRecord"},
-            {"✏️編集", "editRecord"},
-            {"🗓データ抽出（カレンダー）", "calendar"},
-            {"📁インポート / エクスポート", "importexport"},
-            {"👥グループ管理", "createGroup"},
-            {"🔗グループ参加", "joinGroup"},
-            {"📊グラフ表示", "graph"}  // ← ここに追加
-        };
+        	    {"📋データ登録", "addRecord"},
+        	    {"✏️編集", "editRecord"},
+        	    //{"🗓データ抽出（カレンダー）", "calendar"},
+        	    //{"📁インポート / エクスポート", "importexport"},
+        	    {"👥グループ管理", "group"},  // ← ここを group に変える
+        	    {"🔗グループ参加", "joinGroup"},
+        	    {"📊グラフ表示", "graph"}
+        	};
+
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 12);
         for (String[] item : menuItems) {
@@ -95,7 +97,7 @@ public class HomePanel extends JPanel {
 
             // グループ関連のボタンは無効化（グレーアウト）
             if (name.equals("createGroup") || name.equals("joinGroup")) {
-                btn.setEnabled(false);
+                btn.setEnabled(true);
             }
 
             btn.addActionListener(e -> {
@@ -117,8 +119,8 @@ public class HomePanel extends JPanel {
         views.put("editRecord", new EditRecordPanel(mainFrame));
         views.put("calendar", createPage("カレンダー画面です。"));
         views.put("importexport", createPage("インポート / エクスポート画面です。"));
-        views.put("group", createPage("グループ管理画面です。"));
-        views.put("createGroup", new GroupCreatePanel(mainFrame));
+        views.put("creategroup", createPage("グループ管理画面です。"));
+        views.put("group", new GroupCreatePanel(mainFrame));
         views.put("joinGroup", new JoinGroupPanel(mainFrame));
         views.put("graph", new GraphPanel(mainFrame));  // ここでGraphPanelを登録
 
@@ -144,6 +146,9 @@ public class HomePanel extends JPanel {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
+    public void updateGroupLabel(String groupName) {
+        groupLabel.setText("グループ：" + (groupName == null ? "なし" : groupName));
+    }
 
     public void setUserInfo(String userId, String group) {
         if (userId == null || userId.isEmpty()) {
@@ -151,9 +156,10 @@ public class HomePanel extends JPanel {
             groupLabel.setText("");
         } else {
             usernameLabel.setText("ユーザーID：" + userId);
-            groupLabel.setText("グループ：" + ((group == null || group.isEmpty()) ? "グループなし" : group));
+            groupLabel.setText("グループ：" + (group == null || group.isEmpty() ? "なし" : group));
         }
     }
+
 
     private JPanel createPage(String text) {
         JPanel panel = new JPanel(new BorderLayout());
