@@ -38,7 +38,7 @@ public class HomePanel extends JPanel {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
 
-        // === 背景画像読み込み ===
+        // 背景画像読み込み
         try {
             backgroundImage = ImageIO.read(getClass().getResource("/resources/image.jpg"));
         } catch (IOException | IllegalArgumentException e) {
@@ -46,7 +46,7 @@ public class HomePanel extends JPanel {
             backgroundImage = null;
         }
 
-        // --- ヘッダー ---
+        // ヘッダー
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
         headerPanel.setBackground(new Color(60, 141, 188));
 
@@ -64,10 +64,10 @@ public class HomePanel extends JPanel {
         headerPanel.add(groupLabel);
         headerPanel.add(logoutButton);
 
-        // --- 左メニュー ---
+        // 左メニュー
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setOpaque(false);  // 背景透過
+        menuPanel.setOpaque(false);
         menuPanel.setPreferredSize(new Dimension(220, 600));
         menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
 
@@ -78,7 +78,7 @@ public class HomePanel extends JPanel {
             {"📁インポート / エクスポート", "importexport"},
             {"👥グループ管理", "createGroup"},
             {"🔗グループ参加", "joinGroup"},
-            {"📊グラフ表示", "graph"}  // ← ここに追加
+            {"📊グラフ表示", "graph"}
         };
 
         Font btnFont = new Font("SansSerif", Font.BOLD, 12);
@@ -93,7 +93,7 @@ public class HomePanel extends JPanel {
             btn.setBackground(normalColor);
             btn.setFocusPainted(false);
 
-            // グループ関連のボタンは無効化（グレーアウト）
+            // グループ関連のボタンは初期は無効
             if (name.equals("createGroup") || name.equals("joinGroup")) {
                 btn.setEnabled(false);
             }
@@ -108,11 +108,10 @@ public class HomePanel extends JPanel {
             menuPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         }
 
-        // --- 中央ビュー ---
+        // 中央ビュー領域
         viewPanel = new JPanel(null);
-        viewPanel.setOpaque(false);  // 背景透過
+        viewPanel.setOpaque(false);
 
-        // 各画面の登録
         views.put("addRecord", new AddRecordPanel(mainFrame));
         views.put("editRecord", new EditRecordPanel(mainFrame));
         views.put("calendar", createPage("カレンダー画面です。"));
@@ -120,11 +119,11 @@ public class HomePanel extends JPanel {
         views.put("group", createPage("グループ管理画面です。"));
         views.put("createGroup", new GroupCreatePanel(mainFrame));
         views.put("joinGroup", new JoinGroupPanel(mainFrame));
-        views.put("graph", new GraphPanel(mainFrame));  // ここでGraphPanelを登録
+        views.put("graph", new GraphPanel(mainFrame));
 
         for (JPanel panel : views.values()) {
             panel.setVisible(false);
-            panel.setOpaque(false);  // 背景透過
+            panel.setOpaque(false);
             viewPanel.add(panel);
         }
 
@@ -136,7 +135,6 @@ public class HomePanel extends JPanel {
         switchView("addRecord");
     }
 
-    // === 背景画像描画 ===
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -190,12 +188,20 @@ public class HomePanel extends JPanel {
         next.setVisible(true);
         currentView = nextName;
 
-        if ("editRecord".equals(nextName) && next instanceof EditRecordPanel editPanel) {
+        if ("editRecord".equals(nextName) && next instanceof EditRecordPanel) {
+            EditRecordPanel editPanel = (EditRecordPanel) next;
             editPanel.refreshUserInfo();
             editPanel.loadData();
             editPanel.updateTableData();
-        } else if ("addRecord".equals(nextName) && next instanceof AddRecordPanel addPanel) {
+
+        } else if ("addRecord".equals(nextName) && next instanceof AddRecordPanel) {
+            AddRecordPanel addPanel = (AddRecordPanel) next;
             addPanel.refreshUserInfo();
+
+        } else if ("graph".equals(nextName) && next instanceof GraphPanel) {
+            GraphPanel graphPanel = (GraphPanel) next;
+            graphPanel.setUserId(mainFrame.getCurrentUserId());
+            graphPanel.updateChart();
         }
     }
 }
